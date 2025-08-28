@@ -39,6 +39,9 @@ export class AuthService {
     });
 
     return {
+      id: usuario.id,
+      nome: usuario.nome,
+      cpf: usuario.cpf,
       access_token: accessToken,
       refresh_token: refreshToken,
     };
