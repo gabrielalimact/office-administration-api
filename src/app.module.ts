@@ -4,7 +4,9 @@ import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsuarioModule } from './modules/usuario/usuario.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Usuario } from './modules/usuario/entity/usuario.entity';
+import { ProcessosModule } from './modules/processos/processos.module';
+import { ClienteModule } from './modules/cliente/cliente.module';
+import { EnderecosModule } from './modules/enderecos/enderecos.module';
 
 @Module({
   imports: [
@@ -15,11 +17,14 @@ import { Usuario } from './modules/usuario/entity/usuario.entity';
       username: 'postgres',
       password: 'postgres',
       database: 'office_administration_db',
-      entities: [Usuario],
+      autoLoadEntities: true,
       synchronize: true,
     }),
     AuthModule,
     UsuarioModule,
+    ProcessosModule,
+    ClienteModule,
+    EnderecosModule,
   ],
   controllers: [AppController],
   providers: [AppService],
