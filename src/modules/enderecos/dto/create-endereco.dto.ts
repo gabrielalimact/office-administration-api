@@ -1,11 +1,12 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
 
 export class CreateEnderecoDto {
-  @IsString() logradouro: string;
-  @IsString() numero: string;
-  @IsString() complemento: string;
-  @IsString() bairro: string;
-  @IsString() cidade: string;
-  @IsString() estado: string;
-  @IsString() cep: string;
+  @ApiProperty() @IsString() logradouro: string;
+  @ApiProperty() @IsString() numero: string;
+  @ApiProperty() @IsString() complemento: string;
+  @ApiProperty() @IsString() bairro: string;
+  @ApiProperty() @IsString() cidade: string;
+  @ApiProperty() @IsString() estado: string;
+  @ApiProperty() @IsString() cep: string;
 }

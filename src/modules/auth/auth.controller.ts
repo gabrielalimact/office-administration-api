@@ -1,15 +1,16 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { AuthDto } from './dto/auth.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  async login(@Body() dados: { email: string; senha: string }) {
+  async login(@Body() authDto: AuthDto) {
     const usuario = await this.authService.validarUsuario(
-      dados.email,
-      dados.senha,
+      authDto.email,
+      authDto.senha,
     );
 
     return this.authService.login(usuario);
