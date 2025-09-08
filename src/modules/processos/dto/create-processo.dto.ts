@@ -43,6 +43,10 @@ export class CreateProcessoDto {
 
   @ApiProperty()
   @IsString()
+  status: string;
+
+  @ApiProperty()
+  @IsString()
   @IsOptional()
   observacoes: string;
 
