@@ -27,6 +27,9 @@ export class Processo {
   @Column({ type: 'date' })
   data_atendimento: string;
 
+  @Column()
+  status: string;
+
   @Column({ type: 'text', nullable: true })
   observacoes: string;
 
