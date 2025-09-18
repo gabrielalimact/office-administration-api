@@ -1,5 +1,5 @@
-import { Endereco } from 'src/modules/enderecos/entities/endereco.entity';
-import { Processo } from 'src/modules/processos/entities/processo.entity';
+import { Endereco } from '../../enderecos/entities/endereco.entity';
+import { Processo } from '../../processos/entities/processo.entity';
 import {
   Column,
   Entity,

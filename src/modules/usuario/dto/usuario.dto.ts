@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsEnum } from 'class-validator';
+import { CargoUsuario } from '../entity/usuario.entity';
 
 export class UsuarioDto {
   @IsNotEmpty()
@@ -17,4 +18,8 @@ export class UsuarioDto {
   @IsNotEmpty()
   @ApiProperty()
   senha: string;
+
+  @IsEnum(CargoUsuario)
+  @ApiProperty({ enum: CargoUsuario })
+  cargo: CargoUsuario;
 }

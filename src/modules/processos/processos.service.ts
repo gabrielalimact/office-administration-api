@@ -6,6 +6,8 @@ import { Processo } from './entities/processo.entity';
 import { Repository } from 'typeorm';
 import { Cliente } from '../cliente/entities/cliente.entity';
 import { Endereco } from '../enderecos/entities/endereco.entity';
+import { StatusProcesso } from './entities/status-processo.entity';
+import { Beneficio } from './entities/beneficios.entity';
 
 @Injectable()
 export class ProcessosService {
@@ -18,6 +20,12 @@ export class ProcessosService {
 
     @InjectRepository(Endereco)
     private readonly enderecosRepository: Repository<Endereco>,
+
+    @InjectRepository(StatusProcesso)
+    private readonly statusProcessoRepository: Repository<StatusProcesso>,
+
+    @InjectRepository(Beneficio)
+    private readonly beneficioRepository: Repository<Beneficio>,
   ) {}
   async create(createProcessoDto: CreateProcessoDto) {
     const endereco = this.enderecosRepository.create(
@@ -40,6 +48,12 @@ export class ProcessosService {
 
   findAll() {
     return this.processosRepository.find();
+  }
+  findAllStatus() {
+    return this.statusProcessoRepository.find().catch((e) => {
+      console.error('Erro ao buscar status:', e);
+      throw e;
+    });
   }
 
   findOne(id: number) {

@@ -7,7 +7,9 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { CreateClienteDto } from 'src/modules/cliente/dto/create-cliente.dto';
+import { CreateClienteDto } from '../../cliente/dto/create-cliente.dto';
+import { StatusProcesso } from '../entities/status-processo.entity';
+import { Beneficio } from '../entities/beneficios.entity';
 
 export class CreateProcessoDto {
   @ApiProperty({ type: () => CreateClienteDto })
@@ -19,9 +21,9 @@ export class CreateProcessoDto {
   @IsString()
   colaborador: string;
 
-  @ApiProperty()
-  @IsString()
-  beneficio: string;
+  @ApiProperty({ type: () => Beneficio })
+  @Type(() => Beneficio)
+  beneficio: Beneficio;
 
   @ApiProperty()
   @IsBoolean()
@@ -43,7 +45,12 @@ export class CreateProcessoDto {
 
   @ApiProperty()
   @IsString()
-  status: string;
+  @IsDateString()
+  data_ultima_atualizacao: string;
+
+  @ApiProperty({ type: () => StatusProcesso })
+  @Type(() => StatusProcesso)
+  status: StatusProcesso;
 
   @ApiProperty()
   @IsString()

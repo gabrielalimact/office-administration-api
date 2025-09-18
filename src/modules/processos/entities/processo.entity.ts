@@ -1,5 +1,7 @@
-import { Cliente } from 'src/modules/cliente/entities/cliente.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { StatusProcesso } from './status-processo.entity';
+import { Cliente } from '../../cliente/entities/cliente.entity';
+import { Beneficio } from './beneficios.entity';
 
 @Entity('processos')
 export class Processo {
@@ -12,8 +14,8 @@ export class Processo {
   @Column()
   colaborador: string;
 
-  @Column()
-  beneficio: string;
+  @ManyToOne(() => Beneficio)
+  beneficio: Beneficio;
 
   @Column({ default: false })
   olhar_inss: boolean;
@@ -27,8 +29,11 @@ export class Processo {
   @Column({ type: 'date' })
   data_atendimento: string;
 
-  @Column()
-  status: string;
+  @Column({ type: 'date' })
+  data_ultima_atualizacao: string;
+
+  @ManyToOne(() => StatusProcesso)
+  status: StatusProcesso;
 
   @Column({ type: 'text', nullable: true })
   observacoes: string;

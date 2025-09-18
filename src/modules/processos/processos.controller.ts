@@ -24,7 +24,10 @@ export class ProcessosController {
   findAll() {
     return this.processosService.findAll();
   }
-
+  @Get('/status')
+  findAllStatus() {
+    return this.processosService.findAllStatus();
+  }
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.processosService.findOne(+id);
