@@ -62,48 +62,81 @@ export async function seedAll(dataSource: DataSource) {
   });
   await enderecoRepo.save(endereco);
 
-  // Seed Cliente
+  // Seed Clientes
   const clienteRepo = dataSource.getRepository(Cliente);
-  const cliente = clienteRepo.create({
-    nome: 'Cliente Exemplo',
-    data_nascimento: '1990-01-01',
-    cpf: '00000000000',
-    rg: '1234567',
-    filiacao: 'Pai Exemplo',
-    naturalidade: 'Cidade Exemplo',
-    endereco: endereco,
-  });
-  await clienteRepo.save(cliente);
+  const clientes = [];
+  for (let i = 1; i <= 12; i++) {
+    const endereco = enderecoRepo.create({
+      logradouro: `Rua Exemplo ${i}`,
+      numero: `${100 + i}`,
+      complemento: `Apto ${i}`,
+      bairro: 'Centro',
+      cidade: 'Cidade Exemplo',
+      estado: 'EX',
+      cep: `00000-0${i.toString().padStart(2, '0')}`,
+    });
+    await enderecoRepo.save(endereco);
+    const cliente = clienteRepo.create({
+      nome: `Cliente ${i}`,
+      data_nascimento: `1990-01-${i.toString().padStart(2, '0')}`,
+      cpf: `${i.toString().padStart(11, '0')}`,
+      rg: `${1000000 + i}`,
+      filiacao: `Pai Cliente ${i}`,
+      naturalidade: 'Cidade Exemplo',
+      endereco: endereco,
+    });
+    await clienteRepo.save(cliente);
+    clientes.push(cliente);
+  }
 
-  // Seed Usuario
+  // Seed Funcionários (Usuários)
   const usuarioRepo = dataSource.getRepository(Usuario);
-  const usuario = usuarioRepo.create({
-    nome: 'Usuário Admin',
-    cpf: '11111111111',
-    email: 'admin@exemplo.com',
-    senha: '123456',
-    cargo: CargoUsuario.SOCIO,
-  });
-  await usuarioRepo.save(usuario);
+  for (let i = 1; i <= 6; i++) {
+    const usuario = usuarioRepo.create({
+      nome: `Funcionário ${i}`,
+      cpf: `${(90000000000 + i).toString()}`,
+      email: `funcionario${i}@exemplo.com`,
+      senha: '123456',
+      cargo: CargoUsuario.FUNCIONARIO,
+    });
+    await usuarioRepo.save(usuario);
+  }
 
-  // Seed Processo
+  // Seed Processos (2 para cada cliente)
   const processoRepo = dataSource.getRepository(Processo);
   const status = await statusRepo.findOneBy({ nome: 'EM ANDAMENTO' });
-  const beneficio = await beneficioRepo.findOneBy({ nome: 'LOAS/88' });
-  const processo = processoRepo.create({
-    cliente: cliente,
-    colaborador: 'Colaborador Exemplo',
-    beneficio: beneficio,
-    olhar_inss: false,
-    olhar_pje_creta: false,
-    senha_inss: 'senha123',
-    data_atendimento: '2025-09-18',
-    data_ultima_atualizacao: '2025-09-18',
-    status: status,
-    observacoes: 'Observação exemplo',
-    links_documentos: [],
-  });
-  await processoRepo.save(processo);
+  const beneficio1 = await beneficioRepo.findOneBy({ nome: 'LOAS/88' });
+  const beneficio2 = await beneficioRepo.findOneBy({ nome: 'APOSENTADORIA' });
+  for (const cliente of clientes) {
+    const processo1 = processoRepo.create({
+      cliente: cliente,
+      colaborador: 'Colaborador 1',
+      beneficio: beneficio1,
+      olhar_inss: false,
+      olhar_pje_creta: false,
+      senha_inss: 'senha123',
+      data_atendimento: '2025-09-18',
+      data_ultima_atualizacao: '2025-09-18',
+      status: status,
+      observacoes: 'Processo 1 exemplo',
+      links_documentos: [],
+    });
+    await processoRepo.save(processo1);
+    const processo2 = processoRepo.create({
+      cliente: cliente,
+      colaborador: 'Colaborador 2',
+      beneficio: beneficio2,
+      olhar_inss: true,
+      olhar_pje_creta: true,
+      senha_inss: 'senha456',
+      data_atendimento: '2025-09-19',
+      data_ultima_atualizacao: '2025-09-19',
+      status: status,
+      observacoes: 'Processo 2 exemplo',
+      links_documentos: [],
+    });
+    await processoRepo.save(processo2);
+  }
 }
 
 if (require.main === module) {
