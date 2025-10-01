@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Usuario } from './entity/usuario.entity';
 import { Repository } from 'typeorm';
-import { UsuarioDto } from './dto/usuario.dto';
+import { UsuarioDto, UsuarioSemSenhaDto } from './dto/usuario.dto';
 import * as bcrypt from 'bcrypt';
 @Injectable()
 export class UsuarioService {
@@ -20,15 +20,15 @@ export class UsuarioService {
     await this.usuarioRepository.save(usuario);
   }
 
-  async listar(): Promise<Usuario[]> {
+  async listar(): Promise<UsuarioSemSenhaDto[]> {
     return this.usuarioRepository.find();
   }
 
-  async buscarPorId(id: number): Promise<Usuario | null> {
+  async buscarPorId(id: number): Promise<UsuarioSemSenhaDto | null> {
     return this.usuarioRepository.findOne({ where: { id } });
   }
 
-  async buscarPorCPF(cpf: string): Promise<Usuario | null> {
+  async buscarPorCPF(cpf: string): Promise<UsuarioSemSenhaDto | null> {
     return this.usuarioRepository.findOne({ where: { cpf } });
   }
 
@@ -50,6 +50,6 @@ export class UsuarioService {
     if (!usuario) {
       throw new Error('Usuário não encontrado');
     }
-    await this.usuarioRepository.remove(usuario);
+    await this.usuarioRepository.delete(id);
   }
 }

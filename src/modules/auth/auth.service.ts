@@ -51,12 +51,12 @@ export class AuthService {
   async refreshToken(token: string) {
     try {
       const payload = await this.jwtService.verifyAsync(token, {
-        secret: 'chave-secreta-refresh-token',
+        secret: 'segredo_refresh_super_secreto',
       });
       return {
         access_token: this.jwtService.sign(
           { sub: payload.sub, email: payload.email },
-          { secret: 'chave-secreta-token', expiresIn: '15m' },
+          { secret: 'segredo_super_secreto', expiresIn: '15m' },
         ),
       };
     } catch {

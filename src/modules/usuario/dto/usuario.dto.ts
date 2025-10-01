@@ -23,3 +23,21 @@ export class UsuarioDto {
   @ApiProperty({ enum: CargoUsuario })
   cargo: CargoUsuario;
 }
+
+export class UsuarioSemSenhaDto {
+  @IsNotEmpty()
+  @ApiProperty()
+  nome: string;
+
+  @IsEmail()
+  @ApiProperty()
+  email: string;
+
+  @IsNotEmpty()
+  @ApiProperty()
+  cpf: string;
+
+  @IsEnum(CargoUsuario)
+  @ApiProperty({ enum: CargoUsuario })
+  cargo: CargoUsuario;
+}

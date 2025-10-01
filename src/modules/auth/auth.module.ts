@@ -13,7 +13,7 @@ import { JwtStrategy } from './jwt/jwt.strategy';
     PassportModule,
     TypeOrmModule.forFeature([Usuario]),
     JwtModule.register({
-      secret: 'chave-secreta',
+      secret: 'segredo_super_secreto',
       signOptions: { expiresIn: '15m' },
     }),
   ],

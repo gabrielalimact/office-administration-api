@@ -11,9 +11,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UsuarioService } from './usuario.service';
-import { UsuarioDto } from './dto/usuario.dto';
+import { UsuarioDto, UsuarioSemSenhaDto } from './dto/usuario.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { Usuario } from './entity/usuario.entity';
 
 @Controller('usuario')
 export class UsuarioController {
@@ -27,7 +26,7 @@ export class UsuarioController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
-  listar(): Promise<Usuario[]> {
+  listar(): Promise<UsuarioSemSenhaDto[]> {
     return this.usuarioService.listar();
   }
 
