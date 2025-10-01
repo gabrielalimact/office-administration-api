@@ -8,7 +8,7 @@ import { Endereco } from '../src/modules/enderecos/entities/endereco.entity';
 import { Processo } from '../src/modules/processos/entities/processo.entity';
 import { StatusProcesso } from '../src/modules/processos/entities/status-processo.entity';
 import { Beneficio } from '../src/modules/processos/entities/beneficios.entity';
-
+import * as bcrypt from 'bcrypt';
 export async function seedAll(dataSource: DataSource) {
   // Seed StatusProcesso
   const statusList = [
@@ -92,11 +92,12 @@ export async function seedAll(dataSource: DataSource) {
   // Seed Funcionários (Usuários)
   const usuarioRepo = dataSource.getRepository(Usuario);
   for (let i = 1; i <= 6; i++) {
+    const senhaHash = await bcrypt.hash('123456', 10);
     const usuario = usuarioRepo.create({
       nome: `Funcionário ${i}`,
       cpf: `${(90000000000 + i).toString()}`,
       email: `funcionario${i}@exemplo.com`,
-      senha: '123456',
+      senha: senhaHash,
       cargo: CargoUsuario.FUNCIONARIO,
     });
     await usuarioRepo.save(usuario);
