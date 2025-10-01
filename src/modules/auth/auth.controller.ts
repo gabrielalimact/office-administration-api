@@ -9,7 +9,7 @@ export class AuthController {
   @Post('login')
   async login(@Body() authDto: AuthDto) {
     const usuario = await this.authService.validarUsuario(
-      authDto.email,
+      authDto.cpf,
       authDto.senha,
     );
 
