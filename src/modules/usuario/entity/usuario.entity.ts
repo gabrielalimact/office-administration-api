@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 export enum CargoUsuario {
@@ -20,6 +21,7 @@ export class Usuario {
   email: string;
 
   @Column()
+  @Exclude()
   senha: string;
 
   @Column({

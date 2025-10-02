@@ -13,7 +13,7 @@ import { JwtStrategy } from './jwt/jwt.strategy';
     PassportModule,
     TypeOrmModule.forFeature([Usuario]),
     JwtModule.register({
-      secret: process.env.JWT_ACCESS_SECRET,
+      secret: process.env.JWT_ACCESS_SECRET || 'segredo_super_secreto',
       signOptions: { expiresIn: '15m' },
     }),
   ],
