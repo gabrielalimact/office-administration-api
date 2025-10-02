@@ -5,7 +5,11 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    origin: ['http://localhost:3001', 'https://escritorio-dnascimento.cloud'],
+    origin: [
+      'http://localhost:3001',
+      'https://escritorio-dnascimento.cloud',
+      'https://www.escritorio-dnascimento.cloud',
+    ],
     credentials: true,
   });
   const config = new DocumentBuilder()
