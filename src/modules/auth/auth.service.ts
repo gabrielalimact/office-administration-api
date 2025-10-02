@@ -26,15 +26,13 @@ export class AuthService {
       sub: usuario.id,
       cpf: usuario.cpf,
       nome: usuario.nome,
+      cargo: usuario.cargo,
     };
 
-    const accessToken = this.jwtService.sign(payload, {
-      secret: 'segredo_super_secreto',
-      expiresIn: '15m',
-    });
+    const accessToken = this.jwtService.sign(payload);
 
     const refreshToken = this.jwtService.sign(payload, {
-      secret: 'segredo_refresh_super_secreto',
+      secret: process.env.JWT_REFRESH_SECRET,
       expiresIn: '7d',
     });
 
@@ -51,13 +49,21 @@ export class AuthService {
   async refreshToken(token: string) {
     try {
       const payload = await this.jwtService.verifyAsync(token, {
-        secret: 'segredo_refresh_super_secreto',
+        secret: process.env.JWT_REFRESH_SECRET,
       });
+      const newAccess = this.jwtService.sign(
+        {
+          sub: payload.sub,
+          cpf: payload.cpf,
+          nome: payload.nome,
+          cargo: payload.cargo,
+        },
+        {
+          expiresIn: '15m',
+        },
+      );
       return {
-        access_token: this.jwtService.sign(
-          { sub: payload.sub, email: payload.email },
-          { secret: 'segredo_super_secreto', expiresIn: '15m' },
-        ),
+        access_token: newAccess,
       };
     } catch {
       throw new UnauthorizedException('Sessão inválida ou expirou');

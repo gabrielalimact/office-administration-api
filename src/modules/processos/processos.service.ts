@@ -8,6 +8,7 @@ import { Cliente } from '../cliente/entities/cliente.entity';
 import { Endereco } from '../enderecos/entities/endereco.entity';
 import { StatusProcesso } from './entities/status-processo.entity';
 import { Beneficio } from './entities/beneficios.entity';
+import { CreateProcessoExistingDto } from './dto/create-processo-existing.dto';
 
 @Injectable()
 export class ProcessosService {
@@ -46,6 +47,44 @@ export class ProcessosService {
     await this.processosRepository.save(processo);
   }
 
+  async createForExistingClient(
+    clienteId: number,
+    dto: CreateProcessoExistingDto,
+  ) {
+    const cliente = await this.clientesRepository.findOne({
+      where: { id: clienteId },
+      relations: ['endereco'],
+    });
+    if (!cliente) {
+      throw new Error('Cliente não encontrado');
+    }
+
+    const status = await this.statusProcessoRepository.findOne({
+      where: { id: dto.statusId },
+    });
+    if (!status) throw new Error('Status inválido');
+
+    const beneficio = await this.beneficioRepository.findOne({
+      where: { id: dto.beneficioId },
+    });
+    if (!beneficio) throw new Error('Benefício inválido');
+
+    const processo = this.processosRepository.create({
+      cliente,
+      colaborador: dto.colaborador,
+      beneficio,
+      status,
+      olhar_inss: dto.olhar_inss,
+      olhar_pje_creta: dto.olhar_pje_creta,
+      senha_inss: dto.senha_inss,
+      data_atendimento: dto.data_atendimento,
+      data_ultima_atualizacao: dto.data_ultima_atualizacao,
+      observacoes: dto.observacoes,
+      links_documentos: dto.links_documentos,
+    });
+
+    return this.processosRepository.save(processo);
+  }
   findAll() {
     return this.processosRepository.find();
   }

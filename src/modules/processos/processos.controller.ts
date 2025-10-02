@@ -10,6 +10,7 @@ import {
 import { ProcessosService } from './processos.service';
 import { CreateProcessoDto } from './dto/create-processo.dto';
 import { UpdateProcessoDto } from './dto/update-processo.dto';
+import { CreateProcessoExistingDto } from './dto/create-processo-existing.dto';
 
 @Controller('processos')
 export class ProcessosController {
@@ -18,6 +19,14 @@ export class ProcessosController {
   @Post()
   create(@Body() createProcessoDto: CreateProcessoDto) {
     return this.processosService.create(createProcessoDto);
+  }
+
+  @Post('cliente/:clienteId')
+  createForExisting(
+    @Param('clienteId') clienteId: string,
+    @Body() dto: CreateProcessoExistingDto,
+  ) {
+    return this.processosService.createForExistingClient(+clienteId, dto);
   }
 
   @Get()
