@@ -13,11 +13,11 @@ import { RelatoriosModule } from './modules/relatorios/relatorios.module';
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'postgres',
-      database: 'office_administration_db',
+      host: process.env.HOST,
+      port: parseInt(process.env.PORT, 10),
+      username: process.env.USERNAME,
+      password: process.env.PASSWORD,
+      database: process.env.DATABASE,
       autoLoadEntities: true,
       synchronize: true,
     }),
