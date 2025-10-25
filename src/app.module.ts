@@ -8,7 +8,8 @@ import { ProcessosModule } from './modules/processos/processos.module';
 import { ClienteModule } from './modules/cliente/cliente.module';
 import { EnderecosModule } from './modules/enderecos/enderecos.module';
 import { RelatoriosModule } from './modules/relatorios/relatorios.module';
-
+import * as dotenv from 'dotenv';
+dotenv.config();
 @Module({
   imports: [
     TypeOrmModule.forRoot({
