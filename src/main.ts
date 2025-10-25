@@ -4,14 +4,19 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
   app.enableCors({
     origin: [
       'http://localhost:3001',
       'https://escritorio-dnascimento.cloud',
       'https://www.escritorio-dnascimento.cloud',
     ],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     credentials: true,
+    optionsSuccessStatus: 204,
   });
+
   const config = new DocumentBuilder()
     .setTitle('Office Administration API')
     .setDescription('API for managing office administration tasks')
