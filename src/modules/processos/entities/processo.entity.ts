@@ -18,6 +18,9 @@ export class Processo {
   beneficio: Beneficio;
 
   @Column({ default: false })
+  arquivado: boolean;
+
+  @Column({ default: false })
   olhar_inss: boolean;
 
   @Column({ default: false })

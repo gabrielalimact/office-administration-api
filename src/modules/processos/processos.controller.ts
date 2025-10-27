@@ -37,6 +37,10 @@ export class ProcessosController {
   findAllStatus() {
     return this.processosService.findAllStatus();
   }
+  @Get('cliente/:clienteId')
+  findByCliente(@Param('clienteId') clienteId: string) {
+    return this.processosService.findByCliente(+clienteId);
+  }
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.processosService.findOne(+id);

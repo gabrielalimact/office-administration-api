@@ -70,23 +70,27 @@ export class ProcessosService {
     if (!beneficio) throw new Error('Benefício inválido');
 
     const processo = this.processosRepository.create({
-      cliente,
-      colaborador: dto.colaborador,
-      beneficio,
+      ...dto,
+      data_ultima_atualizacao:
+        dto.data_ultima_atualizacao || new Date().toISOString().split('T')[0],
+      cliente: { id: clienteId },
       status,
-      olhar_inss: dto.olhar_inss,
-      olhar_pje_creta: dto.olhar_pje_creta,
-      senha_inss: dto.senha_inss,
-      data_atendimento: dto.data_atendimento,
-      data_ultima_atualizacao: dto.data_ultima_atualizacao,
-      observacoes: dto.observacoes,
-      links_documentos: dto.links_documentos,
+      beneficio,
     });
 
     return this.processosRepository.save(processo);
   }
   findAll() {
-    return this.processosRepository.find();
+    return this.processosRepository.find({
+      relations: ['cliente', 'status', 'beneficio'],
+    });
+  }
+
+  async findByCliente(clienteId: number) {
+    return this.processosRepository.find({
+      where: { cliente: { id: clienteId } },
+      relations: ['cliente', 'status', 'beneficio', 'cliente.endereco'],
+    });
   }
   findAllStatus() {
     return this.statusProcessoRepository.find().catch((e) => {

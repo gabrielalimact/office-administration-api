@@ -31,6 +31,7 @@ export class CreateProcessoExistingDto {
   data_atendimento: string;
 
   @IsDateString()
+  @IsOptional()
   data_ultima_atualizacao: string;
 
   @IsString()
