@@ -1,5 +1,12 @@
 import { Exclude } from 'class-transformer';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { Arquivo } from '../../arquivo/entities/arquivo.entity';
 
 export enum CargoUsuario {
   FUNCIONARIO = 'FUNCIONÁRIO(A)',
@@ -30,4 +37,11 @@ export class Usuario {
     nullable: false,
   })
   cargo: CargoUsuario;
+
+  @Column({ nullable: true })
+  id_imagem?: number;
+
+  @ManyToOne(() => Arquivo, { nullable: true })
+  @JoinColumn({ name: 'id_imagem' })
+  imagem?: Arquivo;
 }

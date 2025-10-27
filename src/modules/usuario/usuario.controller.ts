@@ -11,7 +11,9 @@ import {
   Put,
   UseGuards,
   UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UsuarioService } from './usuario.service';
 import { UsuarioDto, UsuarioSemSenhaDto } from './dto/usuario.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -27,10 +29,25 @@ export class UsuarioController {
     return this.usuarioService.criar(dto);
   }
 
+  @Post('com-imagem')
+  @UseInterceptors(FileInterceptor('imagem'))
+  @HttpCode(HttpStatus.CREATED)
+  async criarComImagem(
+    @Body() dto: UsuarioDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    return this.usuarioService.criarComImagem(dto, file);
+  }
+
   @UseGuards(AuthGuard('jwt'))
   @Get()
   listar(): Promise<UsuarioSemSenhaDto[]> {
     return this.usuarioService.listar();
+  }
+
+  @Get('funcionarios/processos')
+  listarFuncionariosComProcessos() {
+    return this.usuarioService.listarFuncionariosComProcessos();
   }
 
   @Get(':id')
@@ -46,5 +63,14 @@ export class UsuarioController {
   @Delete(':id')
   delete(@Param('id') id: string) {
     return this.usuarioService.deletar(+id);
+  }
+
+  @Post(':id/avatar')
+  @UseInterceptors(FileInterceptor('avatar'))
+  async uploadAvatar(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.usuarioService.uploadAvatar(+id, file);
   }
 }

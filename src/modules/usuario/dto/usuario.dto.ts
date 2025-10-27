@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsEnum } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsEnum,
+  IsOptional,
+  IsNumber,
+} from 'class-validator';
 import { CargoUsuario } from '../entity/usuario.entity';
 
 export class UsuarioDto {
@@ -22,6 +28,11 @@ export class UsuarioDto {
   @IsEnum(CargoUsuario)
   @ApiProperty({ enum: CargoUsuario })
   cargo: CargoUsuario;
+
+  @IsOptional()
+  @IsNumber()
+  @ApiProperty({ required: false })
+  id_imagem?: number;
 }
 
 export class UsuarioSemSenhaDto {
@@ -40,4 +51,9 @@ export class UsuarioSemSenhaDto {
   @IsEnum(CargoUsuario)
   @ApiProperty({ enum: CargoUsuario })
   cargo: CargoUsuario;
+
+  @IsOptional()
+  @IsNumber()
+  @ApiProperty({ required: false })
+  id_imagem?: number;
 }
