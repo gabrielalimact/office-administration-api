@@ -31,7 +31,12 @@ export class UsuarioController {
   }
 
   @Post('com-imagem')
-  @UseInterceptors(FileInterceptor('imagem'))
+  @UseInterceptors(
+    FileInterceptor('imagem', {
+      dest: './imagens',
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    }),
+  )
   @HttpCode(HttpStatus.CREATED)
   async criarComImagem(
     @Body() dto: UsuarioDto,
@@ -62,7 +67,12 @@ export class UsuarioController {
   }
 
   @Patch(':id')
-  @UseInterceptors(FileInterceptor('imagem'))
+  @UseInterceptors(
+    FileInterceptor('imagem', {
+      dest: './imagens',
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    }),
+  )
   async atualizarCompleto(
     @Param('id') id: string,
     @Body() dto: Partial<UsuarioDto>,
@@ -77,7 +87,12 @@ export class UsuarioController {
   }
 
   @Post(':id/avatar')
-  @UseInterceptors(FileInterceptor('avatar'))
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      dest: './imagens',
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    }),
+  )
   async uploadAvatar(
     @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File,

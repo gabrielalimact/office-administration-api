@@ -13,7 +13,10 @@ export class AuthService {
   ) {}
 
   async validarUsuario(cpf: string, senha: string): Promise<Usuario> {
-    const usuario = await this.usuarioRepository.findOne({ where: { cpf } });
+    const usuario = await this.usuarioRepository.findOne({
+      where: { cpf },
+      relations: ['imagem'],
+    });
 
     if (usuario && (await bcrypt.compare(senha, usuario.senha))) {
       return usuario;
@@ -27,6 +30,7 @@ export class AuthService {
       cpf: usuario.cpf,
       nome: usuario.nome,
       cargo: usuario.cargo,
+      email: usuario.email,
     };
 
     const accessToken = this.jwtService.sign(payload);
@@ -40,7 +44,15 @@ export class AuthService {
       id: usuario.id,
       nome: usuario.nome,
       cpf: usuario.cpf,
+      email: usuario.email,
       cargo: usuario.cargo,
+      avatar: usuario.imagem
+        ? {
+            id: usuario.imagem.id,
+            nome_arquivo: usuario.imagem.nome_arquivo,
+            url: `/imagens/${usuario.imagem.nome_arquivo}`,
+          }
+        : null,
       access_token: accessToken,
       refresh_token: refreshToken,
     };
@@ -57,6 +69,7 @@ export class AuthService {
           cpf: payload.cpf,
           nome: payload.nome,
           cargo: payload.cargo,
+          email: payload.email,
         },
         {
           expiresIn: '15m',

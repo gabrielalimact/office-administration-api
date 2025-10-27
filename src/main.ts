@@ -7,21 +7,36 @@ import { join } from 'path';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Servir arquivos estáticos da pasta imagens
-  app.useStaticAssets(join(__dirname, '..', 'imagens'), {
-    prefix: '/imagens/',
+  // Configuração CORS mais permissiva
+  app.enableCors({
+    origin: true, // Permite qualquer origem em desenvolvimento
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'Origin',
+      'X-Requested-With',
+      'Access-Control-Request-Method',
+      'Access-Control-Request-Headers',
+    ],
+    credentials: true,
+    optionsSuccessStatus: 200,
+    preflightContinue: false,
   });
 
-  app.enableCors({
-    origin: [
-      'http://localhost:3001',
-      'https://escritorio-dnascimento.cloud',
-      'https://www.escritorio-dnascimento.cloud',
-    ],
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-    credentials: true,
-    optionsSuccessStatus: 204,
+  // Servir arquivos estáticos da pasta imagens
+  app.useStaticAssets(join(process.cwd(), 'imagens'), {
+    prefix: '/imagens/',
+    setHeaders: (res) => {
+      // Adiciona headers CORS para arquivos estáticos
+      res.set('Access-Control-Allow-Origin', '*');
+      res.set('Access-Control-Allow-Methods', 'GET');
+      res.set(
+        'Access-Control-Allow-Headers',
+        'Origin, X-Requested-With, Content-Type, Accept',
+      );
+    },
   });
 
   const config = new DocumentBuilder()

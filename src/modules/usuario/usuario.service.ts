@@ -107,15 +107,16 @@ export class UsuarioService {
     }
 
     let novoArquivo = null;
+    let idImagemAnterior = null;
 
     // Se há um arquivo, processa o upload
     if (file) {
-      // Remove o arquivo anterior se existir
+      // Guarda o ID da imagem anterior para deletar depois
       if (usuario.id_imagem) {
-        await this.arquivoService.deletarArquivo(usuario.id_imagem);
+        idImagemAnterior = usuario.id_imagem;
       }
 
-      // Salva o novo arquivo
+      // Salva o novo arquivo primeiro
       novoArquivo = await this.arquivoService.salvarArquivo(file);
       dto.id_imagem = novoArquivo.id;
     }
@@ -125,8 +126,17 @@ export class UsuarioService {
       dto.senha = await bcrypt.hash(dto.senha, 10);
     }
 
-    // Atualiza o usuário
+    // Atualiza o usuário com a nova imagem
     await this.usuarioRepository.update(id, dto);
+
+    // Agora remove o arquivo anterior (depois de atualizar a referência)
+    if (idImagemAnterior && novoArquivo) {
+      try {
+        await this.arquivoService.deletarArquivo(idImagemAnterior);
+      } catch (error) {
+        console.warn('Erro ao deletar arquivo anterior:', error.message);
+      }
+    }
 
     // Busca o usuário atualizado com relações
     const usuarioAtualizado = await this.usuarioRepository.findOne({
@@ -180,16 +190,22 @@ export class UsuarioService {
       throw new Error('Usuário não encontrado');
     }
 
-    // Remove o arquivo anterior se existir
-    if (usuario.id_imagem) {
-      await this.arquivoService.deletarArquivo(usuario.id_imagem);
-    }
+    const idImagemAnterior = usuario.id_imagem;
 
-    // Salva o novo arquivo
+    // Salva o novo arquivo primeiro
     const novoArquivo = await this.arquivoService.salvarArquivo(file);
 
     // Atualiza o usuário com o novo arquivo
     await this.usuarioRepository.update(id, { id_imagem: novoArquivo.id });
+
+    // Remove o arquivo anterior depois de atualizar a referência
+    if (idImagemAnterior) {
+      try {
+        await this.arquivoService.deletarArquivo(idImagemAnterior);
+      } catch (error) {
+        console.warn('Erro ao deletar arquivo anterior:', error.message);
+      }
+    }
 
     return {
       message: 'Avatar atualizado com sucesso',
