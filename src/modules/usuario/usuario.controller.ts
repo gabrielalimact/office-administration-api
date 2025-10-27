@@ -9,6 +9,7 @@ import {
   Param,
   Post,
   Put,
+  Patch,
   UseGuards,
   UseInterceptors,
   UploadedFile,
@@ -58,6 +59,16 @@ export class UsuarioController {
   @Put(':id')
   update(@Param('id') id: string, @Body() dto: Partial<UsuarioDto>) {
     return this.usuarioService.atualizar(+id, dto);
+  }
+
+  @Patch(':id')
+  @UseInterceptors(FileInterceptor('imagem'))
+  async atualizarCompleto(
+    @Param('id') id: string,
+    @Body() dto: Partial<UsuarioDto>,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    return this.usuarioService.atualizarCompleto(+id, dto, file);
   }
 
   @Delete(':id')

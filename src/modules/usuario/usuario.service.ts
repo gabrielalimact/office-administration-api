@@ -92,6 +92,55 @@ export class UsuarioService {
     await this.usuarioRepository.update(id, usuario);
   }
 
+  async atualizarCompleto(
+    id: number,
+    dto: Partial<UsuarioDto>,
+    file?: Express.Multer.File,
+  ): Promise<any> {
+    const usuario = await this.usuarioRepository.findOne({
+      where: { id },
+      relations: ['imagem'],
+    });
+
+    if (!usuario) {
+      throw new Error('Usuário não encontrado');
+    }
+
+    let novoArquivo = null;
+
+    // Se há um arquivo, processa o upload
+    if (file) {
+      // Remove o arquivo anterior se existir
+      if (usuario.id_imagem) {
+        await this.arquivoService.deletarArquivo(usuario.id_imagem);
+      }
+
+      // Salva o novo arquivo
+      novoArquivo = await this.arquivoService.salvarArquivo(file);
+      dto.id_imagem = novoArquivo.id;
+    }
+
+    // Hash da senha se fornecida
+    if (dto.senha) {
+      dto.senha = await bcrypt.hash(dto.senha, 10);
+    }
+
+    // Atualiza o usuário
+    await this.usuarioRepository.update(id, dto);
+
+    // Busca o usuário atualizado com relações
+    const usuarioAtualizado = await this.usuarioRepository.findOne({
+      where: { id },
+      relations: ['imagem'],
+    });
+
+    return {
+      message: 'Usuário atualizado com sucesso',
+      usuario: usuarioAtualizado,
+      arquivo: novoArquivo,
+    };
+  }
+
   async deletar(id: number): Promise<void> {
     const usuario = await this.buscarPorId(id);
     if (!usuario) {
