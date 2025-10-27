@@ -5,13 +5,16 @@ import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { Usuario } from '../usuario/entity/usuario.entity';
+import { Processo } from '../processos/entities/processo.entity';
 import { UsuarioService } from '../usuario/usuario.service';
 import { JwtStrategy } from './jwt/jwt.strategy';
+import { ArquivoModule } from '../arquivo/arquivo.module';
 
 @Module({
   imports: [
     PassportModule,
-    TypeOrmModule.forFeature([Usuario]),
+    TypeOrmModule.forFeature([Usuario, Processo]),
+    ArquivoModule,
     JwtModule.register({
       secret: process.env.JWT_ACCESS_SECRET || 'segredo_super_secreto',
       signOptions: { expiresIn: '15m' },

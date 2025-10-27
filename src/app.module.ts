@@ -8,6 +8,8 @@ import { ProcessosModule } from './modules/processos/processos.module';
 import { ClienteModule } from './modules/cliente/cliente.module';
 import { EnderecosModule } from './modules/enderecos/enderecos.module';
 import { RelatoriosModule } from './modules/relatorios/relatorios.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { ArquivoModule } from './modules/arquivo/arquivo.module';
 import * as dotenv from 'dotenv';
 dotenv.config();
 @Module({
@@ -23,11 +25,14 @@ dotenv.config();
       synchronize: true,
     }),
     AuthModule,
+    ArquivoModule,
     UsuarioModule,
     ProcessosModule,
     ClienteModule,
     EnderecosModule,
     RelatoriosModule,
+    DashboardModule,
+    ArquivoModule,
   ],
   controllers: [AppController],
   providers: [AppService],

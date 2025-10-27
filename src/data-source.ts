@@ -5,14 +5,23 @@ import { Endereco } from './modules/enderecos/entities/endereco.entity';
 import { Processo } from './modules/processos/entities/processo.entity';
 import { StatusProcesso } from './modules/processos/entities/status-processo.entity';
 import { Beneficio } from './modules/processos/entities/beneficios.entity';
+import { Arquivo } from './modules/arquivo/entities/arquivo.entity';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
-  host: process.env.HOST,
-  port: parseInt(process.env.PORT, 10),
-  username: process.env.USERNAME,
-  password: process.env.PASSWORD,
-  database: process.env.DATABASE,
-  entities: [Usuario, Cliente, Endereco, Processo, StatusProcesso, Beneficio],
+  host: process.env.DB_HOST,
+  port: parseInt(process.env.DB_PORT, 10),
+  username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  entities: [
+    Usuario,
+    Cliente,
+    Endereco,
+    Processo,
+    StatusProcesso,
+    Beneficio,
+    Arquivo,
+  ],
   synchronize: true,
 });
