@@ -10,12 +10,28 @@ export class ClienteService {
     @InjectRepository(Cliente)
     private readonly clienteRepository: Repository<Cliente>,
   ) {}
+
   findAll() {
-    return this.clienteRepository.find();
+    return this.clienteRepository.find({
+      relations: [
+        'endereco',
+        'processos',
+        'processos.status',
+        'processos.beneficio',
+      ],
+    });
   }
 
   findOne(id: number) {
-    return this.clienteRepository.findOneBy({ id });
+    return this.clienteRepository.findOne({
+      where: { id },
+      relations: [
+        'endereco',
+        'processos',
+        'processos.status',
+        'processos.beneficio',
+      ],
+    });
   }
 
   update(id: number, updateClienteDto: UpdateClienteDto) {

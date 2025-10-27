@@ -10,6 +10,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateClienteDto {
   @ApiProperty() nome: string;
+  @ApiProperty() @IsOptional() @IsString() email?: string;
   @ApiProperty() @IsDateString() data_nascimento: string;
   @ApiProperty() @IsString() cpf: string;
   @ApiProperty() @IsOptional() @IsString() rg?: string;

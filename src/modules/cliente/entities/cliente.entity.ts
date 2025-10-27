@@ -17,6 +17,9 @@ export class Cliente {
   @Column()
   nome: string;
 
+  @Column({ nullable: true })
+  email: string;
+
   @Column({ type: 'date' })
   data_nascimento: string;
 
