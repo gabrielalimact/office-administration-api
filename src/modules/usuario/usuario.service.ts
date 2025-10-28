@@ -31,7 +31,6 @@ export class UsuarioService {
   ): Promise<any> {
     let id_imagem: number | undefined;
 
-    // Se há um arquivo, salva primeiro
     if (file) {
       const arquivo = await this.arquivoService.salvarArquivo(file);
       id_imagem = arquivo.id;
@@ -109,27 +108,21 @@ export class UsuarioService {
     let novoArquivo = null;
     let idImagemAnterior = null;
 
-    // Se há um arquivo, processa o upload
     if (file) {
-      // Guarda o ID da imagem anterior para deletar depois
       if (usuario.id_imagem) {
         idImagemAnterior = usuario.id_imagem;
       }
 
-      // Salva o novo arquivo primeiro
       novoArquivo = await this.arquivoService.salvarArquivo(file);
       dto.id_imagem = novoArquivo.id;
     }
 
-    // Hash da senha se fornecida
     if (dto.senha) {
       dto.senha = await bcrypt.hash(dto.senha, 10);
     }
 
-    // Atualiza o usuário com a nova imagem
     await this.usuarioRepository.update(id, dto);
 
-    // Agora remove o arquivo anterior (depois de atualizar a referência)
     if (idImagemAnterior && novoArquivo) {
       try {
         await this.arquivoService.deletarArquivo(idImagemAnterior);
@@ -138,7 +131,6 @@ export class UsuarioService {
       }
     }
 
-    // Busca o usuário atualizado com relações
     const usuarioAtualizado = await this.usuarioRepository.findOne({
       where: { id },
       relations: ['imagem'],
@@ -165,8 +157,8 @@ export class UsuarioService {
     const funcionariosComProcessos = await Promise.all(
       funcionarios.map(async (funcionario) => {
         const processos = await this.processosRepository.find({
-          where: { colaborador: funcionario.nome },
-          relations: ['cliente', 'status', 'beneficio'],
+          where: { colaborador: { id: funcionario.id } },
+          relations: ['cliente', 'status', 'beneficio', 'colaborador'],
         });
 
         return {
@@ -192,13 +184,10 @@ export class UsuarioService {
 
     const idImagemAnterior = usuario.id_imagem;
 
-    // Salva o novo arquivo primeiro
     const novoArquivo = await this.arquivoService.salvarArquivo(file);
 
-    // Atualiza o usuário com o novo arquivo
     await this.usuarioRepository.update(id, { id_imagem: novoArquivo.id });
 
-    // Remove o arquivo anterior depois de atualizar a referência
     if (idImagemAnterior) {
       try {
         await this.arquivoService.deletarArquivo(idImagemAnterior);

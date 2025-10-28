@@ -4,7 +4,6 @@ import {
   IsInt,
   IsOptional,
   IsString,
-  IsArray,
 } from 'class-validator';
 
 export class CreateProcessoExistingDto {
@@ -14,8 +13,8 @@ export class CreateProcessoExistingDto {
   @IsInt()
   beneficioId: number;
 
-  @IsString()
-  colaborador: string;
+  @IsInt()
+  colaboradorId: number;
 
   @IsBoolean()
   olhar_inss: boolean;
@@ -37,8 +36,4 @@ export class CreateProcessoExistingDto {
   @IsString()
   @IsOptional()
   observacoes?: string;
-
-  @IsArray()
-  @IsString({ each: true })
-  links_documentos: string[];
 }

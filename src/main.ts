@@ -7,9 +7,8 @@ import { join } from 'path';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Configuração CORS mais permissiva
   app.enableCors({
-    origin: true, // Permite qualquer origem em desenvolvimento
+    origin: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
       'Content-Type',
@@ -25,11 +24,9 @@ async function bootstrap() {
     preflightContinue: false,
   });
 
-  // Servir arquivos estáticos da pasta imagens
   app.useStaticAssets(join(process.cwd(), 'imagens'), {
     prefix: '/imagens/',
     setHeaders: (res) => {
-      // Adiciona headers CORS para arquivos estáticos
       res.set('Access-Control-Allow-Origin', '*');
       res.set('Access-Control-Allow-Methods', 'GET');
       res.set(

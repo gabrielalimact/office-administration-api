@@ -1,7 +1,15 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { StatusProcesso } from './status-processo.entity';
 import { Cliente } from '../../cliente/entities/cliente.entity';
 import { Beneficio } from './beneficios.entity';
+import { Arquivo } from '../../arquivo/entities/arquivo.entity';
+import { Usuario } from '../../usuario/entity/usuario.entity';
 
 @Entity('processos')
 export class Processo {
@@ -11,8 +19,9 @@ export class Processo {
   @ManyToOne(() => Cliente, (cliente) => cliente.processos)
   cliente: Cliente;
 
-  @Column()
-  colaborador: string;
+  @ManyToOne(() => Usuario)
+  @JoinColumn({ name: 'id_colaborador' })
+  colaborador: Usuario;
 
   @ManyToOne(() => Beneficio)
   beneficio: Beneficio;
@@ -41,6 +50,7 @@ export class Processo {
   @Column({ type: 'text', nullable: true })
   observacoes: string;
 
-  @Column({ type: 'text', nullable: true })
-  links_documentos: string[];
+  @ManyToOne(() => Arquivo, { nullable: true })
+  @JoinColumn({ name: 'id_arquivo_documentos' })
+  arquivo_documentos?: Arquivo;
 }

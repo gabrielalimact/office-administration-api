@@ -11,18 +11,33 @@ export class ArquivoService {
     private readonly arquivoRepository: Repository<Arquivo>,
   ) {}
 
-  async salvarArquivo(file: Express.Multer.File): Promise<Arquivo> {
+  async salvarArquivo(
+    file: Express.Multer.File,
+    nomePersonalizado?: string,
+  ): Promise<Arquivo> {
     console.log('Dados do arquivo recebido:', {
       originalname: file.originalname,
       filename: file.filename,
       path: file.path,
       size: file.size,
       mimetype: file.mimetype,
+      nomePersonalizado,
     });
 
-    // Gera nome do arquivo com extensão se não tem extensão
     let nomeArquivo = file.filename;
     let caminhoArquivo = file.path;
+
+    if (nomePersonalizado) {
+      const novoPath = file.path.replace(file.filename, nomePersonalizado);
+
+      try {
+        fs.renameSync(file.path, novoPath);
+        nomeArquivo = nomePersonalizado;
+        caminhoArquivo = novoPath;
+      } catch (error) {
+        console.error('Erro ao renomear arquivo:', error);
+      }
+    }
 
     if (!nomeArquivo || !nomeArquivo.includes('.')) {
       const timestamp = Date.now();
@@ -31,7 +46,6 @@ export class ArquivoService {
       const novoNome = `avatar-${timestamp}-${random}.${ext}`;
       const novoCaminho = `./imagens/${novoNome}`;
 
-      // Move o arquivo para o novo nome se necessário
       if (file.path && file.path !== novoCaminho) {
         fs.renameSync(file.path, novoCaminho);
         nomeArquivo = novoNome;
@@ -63,12 +77,10 @@ export class ArquivoService {
       throw new Error('Arquivo não encontrado');
     }
 
-    // Remove o arquivo físico
     if (fs.existsSync(arquivo.caminho)) {
       fs.unlinkSync(arquivo.caminho);
     }
 
-    // Remove o registro do banco
     await this.arquivoRepository.delete(id);
   }
 

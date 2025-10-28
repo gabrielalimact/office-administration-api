@@ -9,8 +9,8 @@ import {
 import { Arquivo } from '../../arquivo/entities/arquivo.entity';
 
 export enum CargoUsuario {
-  FUNCIONARIO = 'FUNCIONÁRIO(A)',
-  SOCIO = 'SÓCIO(A)',
+  FUNCIONARIO = 'funcionario',
+  SOCIO = 'socio',
 }
 
 @Entity()

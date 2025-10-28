@@ -7,6 +7,8 @@ import { Cliente } from '../cliente/entities/cliente.entity';
 import { Endereco } from '../enderecos/entities/endereco.entity';
 import { StatusProcesso } from './entities/status-processo.entity';
 import { Beneficio } from './entities/beneficios.entity';
+import { ArquivoModule } from '../arquivo/arquivo.module';
+import { Usuario } from '../usuario/entity/usuario.entity';
 
 @Module({
   imports: [
@@ -16,7 +18,9 @@ import { Beneficio } from './entities/beneficios.entity';
       Endereco,
       StatusProcesso,
       Beneficio,
+      Usuario,
     ]),
+    ArquivoModule,
   ],
   controllers: [ProcessosController],
   providers: [ProcessosService],

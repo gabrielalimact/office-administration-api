@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsString,
   ValidateNested,
+  IsNumber,
 } from 'class-validator';
 import { CreateClienteDto } from '../../cliente/dto/create-cliente.dto';
 import { StatusProcesso } from '../entities/status-processo.entity';
@@ -17,9 +18,9 @@ export class CreateProcessoDto {
   @Type(() => CreateClienteDto)
   cliente: CreateClienteDto;
 
-  @ApiProperty()
-  @IsString()
-  colaborador: string;
+  @ApiProperty({ description: 'ID do colaborador/usuário responsável' })
+  @IsNumber()
+  colaboradorId: number;
 
   @ApiProperty({ type: () => Beneficio })
   @Type(() => Beneficio)
@@ -56,9 +57,4 @@ export class CreateProcessoDto {
   @IsString()
   @IsOptional()
   observacoes: string;
-
-  @ApiProperty({ type: [String] })
-  @IsString({ each: true })
-  @IsOptional()
-  links_documentos: string[];
 }

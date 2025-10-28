@@ -15,10 +15,7 @@ export class DashboardService {
   ) {}
 
   async getDashboardStats() {
-    // Total de processos cadastrados
     const totalProcessos = await this.processosRepository.count();
-
-    // Processos arquivados e não arquivados
     const processosArquivados = await this.processosRepository.count({
       where: { arquivado: true },
     });
@@ -26,7 +23,6 @@ export class DashboardService {
       where: { arquivado: false },
     });
 
-    // Quantidade de processos por benefício
     const processosPorBeneficio = await this.processosRepository
       .createQueryBuilder('processo')
       .leftJoin('processo.beneficio', 'beneficio')
@@ -36,7 +32,6 @@ export class DashboardService {
       .addGroupBy('beneficio.nome')
       .getRawMany();
 
-    // Total de clientes com processos ativos (não arquivados)
     const clientesComProcessosAtivosResult = await this.clientesRepository
       .createQueryBuilder('cliente')
       .innerJoin('cliente.processos', 'processo')
