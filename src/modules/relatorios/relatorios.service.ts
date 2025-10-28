@@ -27,6 +27,7 @@ export class RelatoriosService {
         nome: funcionario.nome,
         cargo: funcionario.cargo,
       },
+      titulo: dto.titulo,
       conteudo: dto.conteudo,
     });
     return this.relatorioRepo.save(rel);

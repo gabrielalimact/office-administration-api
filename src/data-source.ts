@@ -6,6 +6,7 @@ import { Processo } from './modules/processos/entities/processo.entity';
 import { StatusProcesso } from './modules/processos/entities/status-processo.entity';
 import { Beneficio } from './modules/processos/entities/beneficios.entity';
 import { Arquivo } from './modules/arquivo/entities/arquivo.entity';
+import { Relatorio } from './modules/relatorios/entities/relatorios.entity';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -22,6 +23,9 @@ export const AppDataSource = new DataSource({
     StatusProcesso,
     Beneficio,
     Arquivo,
+    Relatorio,
   ],
+  migrations: ['dist/migrations/*.js'],
+  migrationsTableName: 'migrations',
   synchronize: true,
 });

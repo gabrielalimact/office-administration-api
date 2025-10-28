@@ -15,6 +15,9 @@ export class Relatorio {
   @ManyToOne(() => Usuario, { eager: true, onDelete: 'CASCADE' })
   funcionario: Usuario;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  titulo: string;
+
   @Column({ type: 'text' })
   conteudo: string;
 
