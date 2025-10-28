@@ -40,27 +40,46 @@ async function bootstrap() {
     preflightContinue: false,
   });
 
+  app.use('/imagens', (req, res, next) => {
+    const origin = req.headers.origin;
+    const allowedOrigins = getAllowedOrigins();
+
+    console.log(`🖼️ Requisição de imagem - Origin: ${origin || 'NONE'}`);
+    console.log(`📋 Origens permitidas: ${allowedOrigins.join(', ')}`);
+
+    if (!origin || allowedOrigins.includes(origin)) {
+      if (origin) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        console.log(`✅ CORS permitido para: ${origin}`);
+      } else {
+        console.log('✅ Requisição direta (sem origin) permitida');
+      }
+      res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+      res.setHeader(
+        'Access-Control-Allow-Headers',
+        'Content-Type, Accept, Range',
+      );
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+    } else {
+      console.log(`🚫 CORS bloqueado para: ${origin}`);
+    }
+
+    // Headers de segurança
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Cache-Control', 'public, max-age=31536000');
+
+    // Responder ao preflight
+    if (req.method === 'OPTIONS') {
+      console.log('🔄 Respondendo a preflight de imagem');
+      res.status(200).end();
+      return;
+    }
+
+    next();
+  });
+
   app.useStaticAssets(join(process.cwd(), 'imagens'), {
     prefix: '/imagens/',
-    setHeaders: (res) => {
-      if (isProduction) {
-        res.set(
-          'Access-Control-Allow-Origin',
-          'https://escritorio-dnascimento.cloud',
-        );
-        res.set(
-          'Access-Control-Allow-Origin',
-          'https://www.escritorio-dnascimento.cloud',
-        );
-      } else {
-        res.set('Access-Control-Allow-Origin', '*');
-      }
-      res.set('Access-Control-Allow-Methods', 'GET');
-      res.set('Access-Control-Allow-Headers', 'Content-Type, Accept');
-
-      res.set('X-Content-Type-Options', 'nosniff');
-      res.set('Cache-Control', 'public, max-age=31536000');
-    },
   });
 
   if (isProduction) {

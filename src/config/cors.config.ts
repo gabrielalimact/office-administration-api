@@ -1,11 +1,12 @@
+// Configurações CORS para diferentes ambientes
 export const corsConfig = {
   production: [
-    // front end em produçao
+    // Frontend em produção
     'https://escritorio-dnascimento.cloud',
     'https://www.escritorio-dnascimento.cloud',
   ],
 
-  development: ['http://localhost:3001'],
+  development: ['http://localhost:3001', 'http://127.0.0.1:3001'],
 
   test: ['http://localhost:3001', 'http://127.0.0.1:3001'],
 };
