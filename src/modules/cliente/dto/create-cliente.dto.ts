@@ -6,18 +6,16 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CreateEnderecoDto } from 'src/modules/enderecos/dto/create-endereco.dto';
-import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateClienteDto {
-  @ApiProperty() nome: string;
-  @ApiProperty() @IsOptional() @IsString() email?: string;
-  @ApiProperty() @IsDateString() data_nascimento: string;
-  @ApiProperty() @IsString() cpf: string;
-  @ApiProperty() @IsOptional() @IsString() rg?: string;
-  @ApiProperty() @IsOptional() @IsString() filiacao?: string;
-  @ApiProperty() @IsOptional() @IsString() naturalidade?: string;
+  nome: string;
+  @IsOptional() @IsString() email?: string;
+  @IsDateString() data_nascimento: string;
+  @IsString() cpf: string;
+  @IsOptional() @IsString() rg?: string;
+  @IsOptional() @IsString() filiacao?: string;
+  @IsOptional() @IsString() naturalidade?: string;
 
-  @ApiProperty({ type: CreateEnderecoDto })
   @ValidateNested()
   @Type(() => CreateEnderecoDto)
   endereco: CreateEnderecoDto;
