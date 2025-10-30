@@ -116,7 +116,7 @@ export class ProcessosService {
             nomePersonalizado,
             manager,
           );
-          
+
           processoSalvo.arquivo_documentos = arquivo;
           await manager.save(Processo, processoSalvo);
         } catch (error) {
@@ -175,7 +175,7 @@ export class ProcessosService {
       });
 
       const processoSalvo = await manager.save(Processo, processo);
-      
+
       if (file) {
         try {
           const nomeCliente = cliente.nome.replace(/\s+/g, '_');
