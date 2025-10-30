@@ -39,6 +39,6 @@ export class Cliente {
   @JoinColumn({ name: 'id_endereco' })
   endereco: Endereco;
 
-  @OneToMany(() => Processo, (processo) => processo.cliente)
+  @OneToMany(() => Processo, (processo) => processo.cliente, { cascade: true })
   processos: Processo[];
 }
