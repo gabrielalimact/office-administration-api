@@ -10,6 +10,8 @@ import { EnderecosModule } from './modules/enderecos/enderecos.module';
 import { RelatoriosModule } from './modules/relatorios/relatorios.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { ArquivoModule } from './modules/arquivo/arquivo.module';
+import { BeneficiosModule } from './modules/beneficios/beneficios.module';
+import { StatusProcessoModule } from './modules/status-processo/status-processo.module';
 import * as dotenv from 'dotenv';
 dotenv.config();
 @Module({
@@ -33,6 +35,8 @@ dotenv.config();
     RelatoriosModule,
     DashboardModule,
     ArquivoModule,
+    BeneficiosModule,
+    StatusProcessoModule,
   ],
   controllers: [AppController],
   providers: [AppService],
