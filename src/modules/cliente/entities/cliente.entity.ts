@@ -20,7 +20,7 @@ export class Cliente {
   @Column({ nullable: true })
   email: string;
 
-  @Column({ type: 'date' })
+  @Column({ type: 'date', nullable: true })
   data_nascimento: string;
 
   @Column({ unique: true })
