@@ -25,7 +25,7 @@ export class ProcessosController {
   @UseInterceptors(
     FileInterceptor('arquivo', {
       storage: diskStorage({
-        destination: './imagens',
+        destination: './documentos-clientes',
         filename: (req, file, callback) => {
           const uniqueSuffix =
             Date.now() + '-' + Math.round(Math.random() * 1e9);
@@ -91,7 +91,7 @@ export class ProcessosController {
   @UseInterceptors(
     FileInterceptor('arquivo', {
       storage: diskStorage({
-        destination: './imagens',
+        destination: './documentos-clientes',
         filename: (req, file, callback) => {
           const uniqueSuffix =
             Date.now() + '-' + Math.round(Math.random() * 1e9);
@@ -164,7 +164,7 @@ export class ProcessosController {
   @UseInterceptors(
     FileInterceptor('arquivo', {
       storage: diskStorage({
-        destination: './imagens',
+        destination: './documentos-clientes',
         filename: (req, file, callback) => {
           const uniqueSuffix =
             Date.now() + '-' + Math.round(Math.random() * 1e9);

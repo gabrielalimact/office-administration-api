@@ -11,19 +11,23 @@ export class MulterConfigService implements MulterOptionsFactory {
   createMulterOptions(): MulterModuleOptions {
     return {
       storage: diskStorage({
-        destination: './imagens',
+        destination: './documentos-clientes',
         filename: (req, file, callback) => {
           const uniqueSuffix =
             Date.now() + '-' + Math.round(Math.random() * 1e9);
           const ext = extname(file.originalname);
-          const filename = `avatar-${uniqueSuffix}${ext}`;
+          const filename = `documento-${uniqueSuffix}${ext}`;
           callback(null, filename);
         },
       }),
       fileFilter: (req, file, callback) => {
-        if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+        if (
+          !file.originalname.match(/\.(pdf|doc|docx|jpg|jpeg|png|gif|zip|rar)$/)
+        ) {
           return callback(
-            new Error('Apenas arquivos de imagem são permitidos!'),
+            new Error(
+              'Apenas arquivos de documento são permitidos! (PDF, DOC, DOCX, imagens, ZIP, RAR)',
+            ),
             false,
           );
         }

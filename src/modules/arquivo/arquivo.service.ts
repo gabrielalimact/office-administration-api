@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, EntityManager } from 'typeorm';
 import { Arquivo } from './entities/arquivo.entity';
 import * as fs from 'fs';
 
@@ -14,6 +14,7 @@ export class ArquivoService {
   async salvarArquivo(
     file: Express.Multer.File,
     nomePersonalizado?: string,
+    manager?: EntityManager,
   ): Promise<Arquivo> {
     console.log('Dados do arquivo recebido:', {
       originalname: file.originalname,
@@ -36,6 +37,8 @@ export class ArquivoService {
         caminhoArquivo = novoPath;
       } catch (error) {
         console.error('Erro ao renomear arquivo:', error);
+        // Se falhar ao renomear, lançar erro para reverter transação
+        throw new Error(`Erro ao renomear arquivo: ${error.message}`);
       }
     }
 
@@ -43,28 +46,43 @@ export class ArquivoService {
       const timestamp = Date.now();
       const random = Math.round(Math.random() * 1e9);
       const ext = file.originalname.split('.').pop();
-      const novoNome = `avatar-${timestamp}-${random}.${ext}`;
-      const novoCaminho = `./imagens/${novoNome}`;
+      const novoNome = `documento-${timestamp}-${random}.${ext}`;
+      const novoCaminho = `./documentos-clientes/${novoNome}`;
 
-      if (file.path && file.path !== novoCaminho) {
-        fs.renameSync(file.path, novoCaminho);
-        nomeArquivo = novoNome;
-        caminhoArquivo = novoCaminho;
-      } else {
-        nomeArquivo = novoNome;
-        caminhoArquivo = novoCaminho;
+      try {
+        if (file.path && file.path !== novoCaminho) {
+          fs.renameSync(file.path, novoCaminho);
+          nomeArquivo = novoNome;
+          caminhoArquivo = novoCaminho;
+        } else {
+          nomeArquivo = novoNome;
+          caminhoArquivo = novoCaminho;
+        }
+      } catch (error) {
+        console.error('Erro ao renomear arquivo:', error);
+        throw new Error(`Erro ao processar arquivo: ${error.message}`);
       }
     }
 
-    const arquivo = this.arquivoRepository.create({
-      nome_original: file.originalname,
-      nome_arquivo: nomeArquivo,
-      caminho: caminhoArquivo,
-      tamanho: file.size,
-      tipo_mime: file.mimetype,
-    });
-
-    return this.arquivoRepository.save(arquivo);
+    if (manager) {
+      const arquivo = manager.create(Arquivo, {
+        nome_original: file.originalname,
+        nome_arquivo: nomeArquivo,
+        caminho: caminhoArquivo,
+        tamanho: file.size,
+        tipo_mime: file.mimetype,
+      });
+      return manager.save(Arquivo, arquivo);
+    } else {
+      const arquivo = this.arquivoRepository.create({
+        nome_original: file.originalname,
+        nome_arquivo: nomeArquivo,
+        caminho: caminhoArquivo,
+        tamanho: file.size,
+        tipo_mime: file.mimetype,
+      });
+      return this.arquivoRepository.save(arquivo);
+    }
   }
 
   async buscarPorId(id: number): Promise<Arquivo | null> {
