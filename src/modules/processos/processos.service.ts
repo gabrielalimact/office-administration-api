@@ -11,6 +11,8 @@ import { Beneficio } from './entities/beneficios.entity';
 import { CreateProcessoExistingDto } from './dto/create-processo-existing.dto';
 import { ArquivoService } from '../arquivo/arquivo.service';
 import { Usuario } from '../usuario/entity/usuario.entity';
+import { AuditoriaService } from '../auditoria/auditoria.service';
+import { TipoEntidade } from '../auditoria/entities/auditoria-log.entity';
 
 @Injectable()
 export class ProcessosService {
@@ -35,10 +37,14 @@ export class ProcessosService {
 
     private readonly arquivoService: ArquivoService,
     private readonly dataSource: DataSource,
+    private readonly auditoriaService: AuditoriaService,
   ) {}
   async create(
     createProcessoDto: CreateProcessoDto,
     file?: Express.Multer.File,
+    usuarioLogado?: Usuario,
+    ipAddress?: string,
+    userAgent?: string,
   ) {
     // Usar transação para garantir que tudo seja criado junto ou nada seja criado
     return await this.dataSource.transaction(async (manager) => {
@@ -119,10 +125,45 @@ export class ProcessosService {
 
           processoSalvo.arquivo_documentos = arquivo;
           await manager.save(Processo, processoSalvo);
+
+          // Registrar envio de documento se usuário informado
+          if (usuarioLogado) {
+            await this.auditoriaService.registrarEnvioDocumento(
+              usuarioLogado,
+              processoSalvo.id,
+              file.originalname,
+              ipAddress,
+              userAgent,
+            );
+          }
         } catch (error) {
           // Se falhar ao salvar arquivo, toda a transação será revertida
           throw new Error(`Erro ao salvar arquivo: ${error.message}`);
         }
+      }
+
+      // Registrar criação de cliente se usuário informado
+      if (usuarioLogado) {
+        await this.auditoriaService.registrarCriacao(
+          usuarioLogado,
+          TipoEntidade.CLIENTE,
+          clienteSalvo.id,
+          clienteSalvo,
+          `Cliente "${clienteSalvo.nome}" criado`,
+          ipAddress,
+          userAgent,
+        );
+
+        // Registrar criação de processo
+        await this.auditoriaService.registrarCriacao(
+          usuarioLogado,
+          TipoEntidade.PROCESSO,
+          processoSalvo.id,
+          processoSalvo,
+          `Processo criado para cliente "${clienteSalvo.nome}"`,
+          ipAddress,
+          userAgent,
+        );
       }
 
       return processoSalvo;
@@ -198,8 +239,8 @@ export class ProcessosService {
       return processoSalvo;
     });
   }
-  findAll() {
-    return this.processosRepository.find({
+  async findAll() {
+    const processos = await this.processosRepository.find({
       relations: [
         'cliente',
         'status',
@@ -208,10 +249,22 @@ export class ProcessosService {
         'colaborador',
       ],
     });
+
+    // Transformar a resposta para incluir apenas id, nome e cargo do colaborador
+    return processos.map((processo) => ({
+      ...processo,
+      colaborador: processo.colaborador
+        ? {
+            id: processo.colaborador.id,
+            nome: processo.colaborador.nome,
+            cargo: processo.colaborador.cargo,
+          }
+        : null,
+    }));
   }
 
   async findByCliente(clienteId: number) {
-    return this.processosRepository.find({
+    const processos = await this.processosRepository.find({
       where: { cliente: { id: clienteId } },
       relations: [
         'cliente',
@@ -222,6 +275,18 @@ export class ProcessosService {
         'colaborador',
       ],
     });
+
+    // Transformar a resposta para incluir apenas id, nome e cargo do colaborador
+    return processos.map((processo) => ({
+      ...processo,
+      colaborador: processo.colaborador
+        ? {
+            id: processo.colaborador.id,
+            nome: processo.colaborador.nome,
+            cargo: processo.colaborador.cargo,
+          }
+        : null,
+    }));
   }
   findAllStatus() {
     return this.statusProcessoRepository.find().catch((e) => {
@@ -230,8 +295,34 @@ export class ProcessosService {
     });
   }
 
-  findOne(id: number) {
-    return this.processosRepository.findOne({ where: { id } });
+  async findOne(id: number) {
+    const processo = await this.processosRepository.findOne({
+      where: { id },
+      relations: [
+        'cliente',
+        'cliente.endereco',
+        'status',
+        'beneficio',
+        'arquivo_documentos',
+        'colaborador',
+      ],
+    });
+
+    if (!processo) {
+      return null;
+    }
+
+    // Transformar a resposta para incluir apenas id, nome e cargo do colaborador
+    return {
+      ...processo,
+      colaborador: processo.colaborador
+        ? {
+            id: processo.colaborador.id,
+            nome: processo.colaborador.nome,
+            cargo: processo.colaborador.cargo,
+          }
+        : null,
+    };
   }
 
   update(id: number, updateProcessoDto: UpdateProcessoDto) {

@@ -8,8 +8,12 @@ import {
   Delete,
   UseInterceptors,
   UploadedFile,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Request } from 'express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { ProcessosService } from './processos.service';
@@ -18,6 +22,7 @@ import { UpdateProcessoDto } from './dto/update-processo.dto';
 import { CreateProcessoExistingDto } from './dto/create-processo-existing.dto';
 
 @Controller('processos')
+@UseGuards(AuthGuard('jwt'))
 export class ProcessosController {
   constructor(private readonly processosService: ProcessosService) {}
 
@@ -56,7 +61,11 @@ export class ProcessosController {
       },
     }),
   )
-  create(@Body() body: any, @UploadedFile() file?: Express.Multer.File) {
+  create(
+    @Body() body: any,
+    @UploadedFile() file: Express.Multer.File,
+    @Req() request: Request,
+  ) {
     // Parse dos dados JSON enviados como multipart/form-data
     const createProcessoDto: CreateProcessoDto = {
       cliente:
@@ -84,7 +93,17 @@ export class ProcessosController {
       observacoes: body.observacoes || undefined,
     };
 
-    return this.processosService.create(createProcessoDto, file);
+    const usuario = request['user'];
+    const ipAddress = this.getClientIp(request);
+    const userAgent = request.headers['user-agent'] || '';
+
+    return this.processosService.create(
+      createProcessoDto,
+      file,
+      usuario,
+      ipAddress,
+      userAgent,
+    );
   }
 
   @Post('cliente/:clienteId')
@@ -206,5 +225,15 @@ export class ProcessosController {
       throw new Error('Nenhum arquivo foi enviado');
     }
     return this.processosService.uploadDocumentos(+id, file);
+  }
+
+  private getClientIp(request: Request): string {
+    return (
+      (request.headers['x-forwarded-for'] as string)?.split(',')[0] ||
+      (request.headers['x-real-ip'] as string) ||
+      request.connection?.remoteAddress ||
+      request.socket?.remoteAddress ||
+      ''
+    );
   }
 }

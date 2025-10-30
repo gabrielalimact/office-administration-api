@@ -16,7 +16,9 @@ export class Processo {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Cliente, (cliente) => cliente.processos)
+  @ManyToOne(() => Cliente, (cliente) => cliente.processos, {
+    onDelete: 'CASCADE',
+  })
   cliente: Cliente;
 
   @ManyToOne(() => Usuario, { nullable: true })

@@ -9,6 +9,7 @@ import { StatusProcesso } from './entities/status-processo.entity';
 import { Beneficio } from './entities/beneficios.entity';
 import { ArquivoModule } from '../arquivo/arquivo.module';
 import { Usuario } from '../usuario/entity/usuario.entity';
+import { AuditoriaModule } from '../auditoria/auditoria.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { Usuario } from '../usuario/entity/usuario.entity';
       Usuario,
     ]),
     ArquivoModule,
+    AuditoriaModule,
   ],
   controllers: [ProcessosController],
   providers: [ProcessosService],
