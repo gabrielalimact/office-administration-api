@@ -1,11 +1,31 @@
-import { IsString } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 
 export class CreateEnderecoDto {
-  @IsString() logradouro: string;
-  @IsString() numero: string;
-  @IsString() complemento: string;
-  @IsString() bairro: string;
-  @IsString() cidade: string;
-  @IsString() estado: string;
-  @IsString() cep: string;
+  @IsOptional()
+  @IsString()
+  logradouro?: string;
+
+  @IsOptional()
+  @IsString()
+  numero?: string;
+
+  @IsOptional()
+  @IsString()
+  complemento?: string;
+
+  @IsOptional()
+  @IsString()
+  bairro?: string;
+
+  @IsOptional()
+  @IsString()
+  cidade?: string;
+
+  @IsOptional()
+  @IsString()
+  estado?: string;
+
+  @IsOptional()
+  @IsString()
+  cep?: string;
 }

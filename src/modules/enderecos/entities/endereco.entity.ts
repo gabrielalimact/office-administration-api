@@ -6,25 +6,25 @@ export class Endereco {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ default: '' })
   logradouro: string;
 
-  @Column()
+  @Column({ default: '' })
   numero: string;
 
-  @Column()
+  @Column({ default: '' })
   complemento: string;
 
-  @Column()
+  @Column({ default: '' })
   bairro: string;
 
-  @Column()
+  @Column({ default: '' })
   cidade: string;
 
-  @Column()
+  @Column({ default: '' })
   estado: string;
 
-  @Column()
+  @Column({ default: '' })
   cep: string;
 
   @OneToOne(() => Cliente, (cliente) => cliente.endereco)
