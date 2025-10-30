@@ -63,11 +63,9 @@ async function bootstrap() {
       console.log(`🚫 CORS bloqueado para: ${origin}`);
     }
 
-    // Headers de segurança
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Cache-Control', 'public, max-age=31536000');
 
-    // Responder ao preflight
     if (req.method === 'OPTIONS') {
       console.log('🔄 Respondendo a preflight de imagem');
       res.status(200).end();
