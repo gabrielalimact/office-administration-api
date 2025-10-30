@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, EntityManager } from 'typeorm';
+import { Response } from 'express';
 import { Arquivo } from './entities/arquivo.entity';
 import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class ArquivoService {
@@ -104,5 +106,25 @@ export class ArquivoService {
 
   async listarTodos(): Promise<Arquivo[]> {
     return this.arquivoRepository.find();
+  }
+
+  async downloadArquivo(id: number, res: Response): Promise<void> {
+    const arquivo = await this.buscarPorId(id);
+    if (!arquivo) {
+      throw new Error('Arquivo não encontrado');
+    }
+
+    if (!fs.existsSync(arquivo.caminho)) {
+      throw new Error('Arquivo físico não encontrado');
+    }
+
+    const nomeDownload = arquivo.nome_original || arquivo.nome_arquivo;
+    
+    res.setHeader('Content-Disposition', `attachment; filename="${nomeDownload}"`);
+    res.setHeader('Content-Type', arquivo.tipo_mime);
+    res.setHeader('Content-Length', arquivo.tamanho);
+
+    const stream = fs.createReadStream(arquivo.caminho);
+    stream.pipe(res);
   }
 }

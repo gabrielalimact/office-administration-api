@@ -12,6 +12,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { ArquivoModule } from './modules/arquivo/arquivo.module';
 import { BeneficiosModule } from './modules/beneficios/beneficios.module';
 import { StatusProcessoModule } from './modules/status-processo/status-processo.module';
+import { AuditoriaModule } from './modules/auditoria/auditoria.module';
 import * as dotenv from 'dotenv';
 dotenv.config();
 @Module({
@@ -34,9 +35,9 @@ dotenv.config();
     EnderecosModule,
     RelatoriosModule,
     DashboardModule,
-    ArquivoModule,
     BeneficiosModule,
     StatusProcessoModule,
+    AuditoriaModule,
   ],
   controllers: [AppController],
   providers: [AppService],

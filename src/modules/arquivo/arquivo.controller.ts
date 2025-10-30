@@ -6,8 +6,10 @@ import {
   Get,
   Param,
   Delete,
+  Res,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
 import { ArquivoService } from './arquivo.service';
 
 @Controller('arquivo')
@@ -23,6 +25,11 @@ export class ArquivoController {
   @Get()
   async listarTodos() {
     return this.arquivoService.listarTodos();
+  }
+
+  @Get('download/:id')
+  async downloadArquivo(@Param('id') id: string, @Res() res: Response) {
+    return this.arquivoService.downloadArquivo(+id, res);
   }
 
   @Get(':id')
