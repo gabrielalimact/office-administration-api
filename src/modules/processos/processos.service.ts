@@ -39,20 +39,41 @@ export class ProcessosService {
     createProcessoDto: CreateProcessoDto,
     file?: Express.Multer.File,
   ) {
-    const colaborador = await this.usuarioRepository.findOne({
-      where: { id: createProcessoDto.colaboradorId },
-    });
-    if (!colaborador) {
-      throw new Error('Colaborador não encontrado');
+    // Colaborador é opcional - se não informado, use o primeiro disponível ou null
+    let colaborador = null;
+    if (createProcessoDto.colaboradorId) {
+      colaborador = await this.usuarioRepository.findOne({
+        where: { id: createProcessoDto.colaboradorId },
+      });
+      if (!colaborador) {
+        throw new Error('Colaborador não encontrado');
+      }
     }
 
-    const endereco = this.enderecosRepository.create(
-      createProcessoDto.cliente.endereco,
-    );
-    await this.enderecosRepository.save(endereco);
+    // Endereço é opcional - só cria se informado
+    let endereco = null;
+    if (createProcessoDto.cliente.endereco) {
+      endereco = this.enderecosRepository.create({
+        ...createProcessoDto.cliente.endereco,
+        logradouro: createProcessoDto.cliente.endereco.logradouro || '',
+        numero: createProcessoDto.cliente.endereco.numero || '',
+        complemento: createProcessoDto.cliente.endereco.complemento || '',
+        bairro: createProcessoDto.cliente.endereco.bairro || '',
+        cidade: createProcessoDto.cliente.endereco.cidade || '',
+        estado: createProcessoDto.cliente.endereco.estado || '',
+        cep: createProcessoDto.cliente.endereco.cep || '',
+      });
+      await this.enderecosRepository.save(endereco);
+    }
 
     const cliente = this.clientesRepository.create({
-      ...createProcessoDto.cliente,
+      nome: createProcessoDto.cliente.nome,
+      email: createProcessoDto.cliente.email || null,
+      data_nascimento: createProcessoDto.cliente.data_nascimento || null,
+      cpf: createProcessoDto.cliente.cpf,
+      rg: createProcessoDto.cliente.rg || null,
+      filiacao: createProcessoDto.cliente.filiacao || null,
+      naturalidade: createProcessoDto.cliente.naturalidade || null,
       endereco,
     });
     await this.clientesRepository.save(cliente);
@@ -61,13 +82,17 @@ export class ProcessosService {
       cliente,
       colaborador,
       beneficio: createProcessoDto.beneficio,
-      olhar_inss: createProcessoDto.olhar_inss,
-      olhar_pje_creta: createProcessoDto.olhar_pje_creta,
-      senha_inss: createProcessoDto.senha_inss,
-      data_atendimento: createProcessoDto.data_atendimento,
-      data_ultima_atualizacao: createProcessoDto.data_ultima_atualizacao,
+      olhar_inss: createProcessoDto.olhar_inss || false,
+      olhar_pje_creta: createProcessoDto.olhar_pje_creta || false,
+      senha_inss: createProcessoDto.senha_inss || null,
+      data_atendimento:
+        createProcessoDto.data_atendimento ||
+        new Date().toISOString().split('T')[0],
+      data_ultima_atualizacao:
+        createProcessoDto.data_ultima_atualizacao ||
+        new Date().toISOString().split('T')[0],
       status: createProcessoDto.status,
-      observacoes: createProcessoDto.observacoes,
+      observacoes: createProcessoDto.observacoes || null,
     });
 
     const processoSalvo = await this.processosRepository.save(processo);

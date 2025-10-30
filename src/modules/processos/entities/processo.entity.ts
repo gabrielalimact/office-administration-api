@@ -19,7 +19,7 @@ export class Processo {
   @ManyToOne(() => Cliente, (cliente) => cliente.processos)
   cliente: Cliente;
 
-  @ManyToOne(() => Usuario)
+  @ManyToOne(() => Usuario, { nullable: true })
   @JoinColumn({ name: 'id_colaborador' })
   colaborador: Usuario;
 

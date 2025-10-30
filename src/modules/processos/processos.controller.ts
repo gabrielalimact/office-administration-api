@@ -56,10 +56,34 @@ export class ProcessosController {
       },
     }),
   )
-  create(
-    @Body() createProcessoDto: CreateProcessoDto,
-    @UploadedFile() file?: Express.Multer.File,
-  ) {
+  create(@Body() body: any, @UploadedFile() file?: Express.Multer.File) {
+    // Parse dos dados JSON enviados como multipart/form-data
+    const createProcessoDto: CreateProcessoDto = {
+      cliente:
+        typeof body.cliente === 'string'
+          ? JSON.parse(body.cliente)
+          : body.cliente,
+      colaboradorId: body.colaboradorId
+        ? parseInt(body.colaboradorId)
+        : undefined,
+      beneficio:
+        typeof body.beneficio === 'string'
+          ? JSON.parse(body.beneficio)
+          : body.beneficio,
+      olhar_inss:
+        body.olhar_inss === 'true' || body.olhar_inss === true || false,
+      olhar_pje_creta:
+        body.olhar_pje_creta === 'true' ||
+        body.olhar_pje_creta === true ||
+        false,
+      senha_inss: body.senha_inss || undefined,
+      data_atendimento: body.data_atendimento || undefined,
+      data_ultima_atualizacao: body.data_ultima_atualizacao || undefined,
+      status:
+        typeof body.status === 'string' ? JSON.parse(body.status) : body.status,
+      observacoes: body.observacoes || undefined,
+    };
+
     return this.processosService.create(createProcessoDto, file);
   }
 
