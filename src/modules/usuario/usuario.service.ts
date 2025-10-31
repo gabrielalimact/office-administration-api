@@ -32,7 +32,12 @@ export class UsuarioService {
     let id_imagem: number | undefined;
 
     if (file) {
-      const arquivo = await this.arquivoService.salvarArquivo(file);
+      const arquivo = await this.arquivoService.salvarArquivo(
+        file,
+        undefined,
+        undefined,
+        true,
+      );
       id_imagem = arquivo.id;
     }
 
@@ -113,7 +118,12 @@ export class UsuarioService {
         idImagemAnterior = usuario.id_imagem;
       }
 
-      novoArquivo = await this.arquivoService.salvarArquivo(file);
+      novoArquivo = await this.arquivoService.salvarArquivo(
+        file,
+        undefined,
+        undefined,
+        true,
+      );
       dto.id_imagem = novoArquivo.id;
     }
 
@@ -184,7 +194,12 @@ export class UsuarioService {
 
     const idImagemAnterior = usuario.id_imagem;
 
-    const novoArquivo = await this.arquivoService.salvarArquivo(file);
+    const novoArquivo = await this.arquivoService.salvarArquivo(
+      file,
+      undefined,
+      undefined,
+      true,
+    );
 
     await this.usuarioRepository.update(id, { id_imagem: novoArquivo.id });
 

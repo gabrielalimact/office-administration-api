@@ -4,6 +4,7 @@ import { Repository, EntityManager } from 'typeorm';
 import { Response } from 'express';
 import { Arquivo } from './entities/arquivo.entity';
 import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class ArquivoService {
@@ -16,6 +17,7 @@ export class ArquivoService {
     file: Express.Multer.File,
     nomePersonalizado?: string,
     manager?: EntityManager,
+    isAvatar?: boolean,
   ): Promise<Arquivo> {
     console.log('Dados do arquivo recebido:', {
       originalname: file.originalname,
@@ -24,66 +26,45 @@ export class ArquivoService {
       size: file.size,
       mimetype: file.mimetype,
       nomePersonalizado,
+      isAvatar,
     });
 
-    let nomeArquivo = file.filename;
-    let caminhoArquivo = file.path;
+    // Define diretório base conforme tipo
+    const baseDir = isAvatar ? './imagens' : './documentos-clientes';
 
-    if (nomePersonalizado) {
-      const novoPath = file.path.replace(file.filename, nomePersonalizado);
-
-      try {
-        fs.renameSync(file.path, novoPath);
-        nomeArquivo = nomePersonalizado;
-        caminhoArquivo = novoPath;
-      } catch (error) {
-        console.error('Erro ao renomear arquivo:', error);
-        // Se falhar ao renomear, lançar erro para reverter transação
-        throw new Error(`Erro ao renomear arquivo: ${error.message}`);
-      }
+    // Cria o diretório se não existir
+    if (!fs.existsSync(baseDir)) {
+      fs.mkdirSync(baseDir, { recursive: true });
     }
 
-    if (!nomeArquivo || !nomeArquivo.includes('.')) {
-      const timestamp = Date.now();
-      const random = Math.round(Math.random() * 1e9);
-      const ext = file.originalname.split('.').pop();
-      const novoNome = `documento-${timestamp}-${random}.${ext}`;
-      const novoCaminho = `./documentos-clientes/${novoNome}`;
+    // Gera nome do arquivo
+    const ext = path.extname(file.originalname) || '';
+    const nomeArquivoFinal =
+      nomePersonalizado ||
+      `${isAvatar ? 'avatar' : 'documento'}-${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
 
-      try {
-        if (file.path && file.path !== novoCaminho) {
-          fs.renameSync(file.path, novoCaminho);
-          nomeArquivo = novoNome;
-          caminhoArquivo = novoCaminho;
-        } else {
-          nomeArquivo = novoNome;
-          caminhoArquivo = novoCaminho;
-        }
-      } catch (error) {
-        console.error('Erro ao renomear arquivo:', error);
-        throw new Error(`Erro ao processar arquivo: ${error.message}`);
-      }
+    const novoCaminho = path.join(baseDir, nomeArquivoFinal);
+
+    try {
+      fs.renameSync(file.path, novoCaminho);
+    } catch (error) {
+      console.error('Erro ao mover arquivo:', error);
+      throw new Error(`Erro ao processar arquivo: ${error.message}`);
     }
+
+    const arquivo = {
+      nome_original: file.originalname,
+      nome_arquivo: nomeArquivoFinal,
+      caminho: novoCaminho,
+      tamanho: file.size,
+      tipo_mime: file.mimetype,
+    };
 
     if (manager) {
-      const arquivo = manager.create(Arquivo, {
-        nome_original: file.originalname,
-        nome_arquivo: nomeArquivo,
-        caminho: caminhoArquivo,
-        tamanho: file.size,
-        tipo_mime: file.mimetype,
-      });
-      return manager.save(Arquivo, arquivo);
-    } else {
-      const arquivo = this.arquivoRepository.create({
-        nome_original: file.originalname,
-        nome_arquivo: nomeArquivo,
-        caminho: caminhoArquivo,
-        tamanho: file.size,
-        tipo_mime: file.mimetype,
-      });
-      return this.arquivoRepository.save(arquivo);
+      return manager.save(Arquivo, manager.create(Arquivo, arquivo));
     }
+
+    return this.arquivoRepository.save(this.arquivoRepository.create(arquivo));
   }
 
   async buscarPorId(id: number): Promise<Arquivo | null> {
@@ -92,9 +73,7 @@ export class ArquivoService {
 
   async deletarArquivo(id: number): Promise<void> {
     const arquivo = await this.buscarPorId(id);
-    if (!arquivo) {
-      throw new Error('Arquivo não encontrado');
-    }
+    if (!arquivo) throw new Error('Arquivo não encontrado');
 
     if (fs.existsSync(arquivo.caminho)) {
       fs.unlinkSync(arquivo.caminho);
@@ -109,16 +88,11 @@ export class ArquivoService {
 
   async downloadArquivo(id: number, res: Response): Promise<void> {
     const arquivo = await this.buscarPorId(id);
-    if (!arquivo) {
-      throw new Error('Arquivo não encontrado');
-    }
-
-    if (!fs.existsSync(arquivo.caminho)) {
+    if (!arquivo) throw new Error('Arquivo não encontrado');
+    if (!fs.existsSync(arquivo.caminho))
       throw new Error('Arquivo físico não encontrado');
-    }
 
     const nomeDownload = arquivo.nome_original || arquivo.nome_arquivo;
-
     res.setHeader(
       'Content-Disposition',
       `attachment; filename="${nomeDownload}"`,
