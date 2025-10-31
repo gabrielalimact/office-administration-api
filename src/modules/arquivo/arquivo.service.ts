@@ -4,7 +4,6 @@ import { Repository, EntityManager } from 'typeorm';
 import { Response } from 'express';
 import { Arquivo } from './entities/arquivo.entity';
 import * as fs from 'fs';
-import * as path from 'path';
 
 @Injectable()
 export class ArquivoService {
@@ -119,8 +118,11 @@ export class ArquivoService {
     }
 
     const nomeDownload = arquivo.nome_original || arquivo.nome_arquivo;
-    
-    res.setHeader('Content-Disposition', `attachment; filename="${nomeDownload}"`);
+
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${nomeDownload}"`,
+    );
     res.setHeader('Content-Type', arquivo.tipo_mime);
     res.setHeader('Content-Length', arquivo.tamanho);
 
