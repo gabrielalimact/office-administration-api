@@ -12,11 +12,10 @@ export class AuditoriaInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest<Request>();
 
-    // Adicionar informações de auditoria ao request
     request['auditoriaInfo'] = {
       ipAddress: this.getClientIp(request),
       userAgent: request.headers['user-agent'] || '',
-      usuario: request['user'], // Usuário vem do JWT guard
+      usuario: request['user'],
     };
 
     return next.handle();

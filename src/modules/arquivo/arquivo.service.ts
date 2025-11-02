@@ -19,25 +19,12 @@ export class ArquivoService {
     manager?: EntityManager,
     isAvatar?: boolean,
   ): Promise<Arquivo> {
-    console.log('Dados do arquivo recebido:', {
-      originalname: file.originalname,
-      filename: file.filename,
-      path: file.path,
-      size: file.size,
-      mimetype: file.mimetype,
-      nomePersonalizado,
-      isAvatar,
-    });
-
-    // Define diretório base conforme tipo
     const baseDir = isAvatar ? './imagens' : './documentos-clientes';
 
-    // Cria o diretório se não existir
     if (!fs.existsSync(baseDir)) {
       fs.mkdirSync(baseDir, { recursive: true });
     }
 
-    // Gera nome do arquivo
     const ext = path.extname(file.originalname) || '';
     const nomeArquivoFinal =
       nomePersonalizado ||
