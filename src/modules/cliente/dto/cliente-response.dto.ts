@@ -12,7 +12,7 @@ export class ProcessoComColaboradorDto {
   olhar_inss: boolean;
   olhar_pje_creta: boolean;
   senha_inss: string;
-  data_atendimento: string;
+  data_cadastro: string;
   data_ultima_atualizacao: string;
   observacoes: string;
   arquivo_documentos: any;
