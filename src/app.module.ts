@@ -14,6 +14,7 @@ import { BeneficiosModule } from './modules/beneficios/beneficios.module';
 import { StatusProcessoModule } from './modules/status-processo/status-processo.module';
 import { AuditoriaModule } from './modules/auditoria/auditoria.module';
 import * as dotenv from 'dotenv';
+import { TipoAgendamentoModule } from './modules/agendamento/agendamento.module';
 dotenv.config();
 @Module({
   imports: [
@@ -37,6 +38,7 @@ dotenv.config();
     DashboardModule,
     BeneficiosModule,
     StatusProcessoModule,
+    TipoAgendamentoModule,
     AuditoriaModule,
   ],
   controllers: [AppController],

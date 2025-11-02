@@ -13,6 +13,7 @@ import { ArquivoService } from '../arquivo/arquivo.service';
 import { Usuario } from '../usuario/entity/usuario.entity';
 import { AuditoriaService } from '../auditoria/auditoria.service';
 import { TipoEntidade } from '../auditoria/entities/auditoria-log.entity';
+import { TipoAgendamento } from './entities/agendamento.entity';
 
 @Injectable()
 export class ProcessosService {
@@ -46,9 +47,7 @@ export class ProcessosService {
     ipAddress?: string,
     userAgent?: string,
   ) {
-    // Usar transação para garantir que tudo seja criado junto ou nada seja criado
     return await this.dataSource.transaction(async (manager) => {
-      // Colaborador é opcional - se não informado, use o primeiro disponível ou null
       let colaborador = null;
       if (createProcessoDto.colaboradorId) {
         colaborador = await manager.findOne(Usuario, {
@@ -59,7 +58,6 @@ export class ProcessosService {
         }
       }
 
-      // Endereço é opcional - só cria se informado
       let endereco = null;
       if (createProcessoDto.cliente.endereco) {
         endereco = manager.create(Endereco, {
@@ -94,28 +92,29 @@ export class ProcessosService {
         olhar_inss: createProcessoDto.olhar_inss || false,
         olhar_pje_creta: createProcessoDto.olhar_pje_creta || false,
         senha_inss: createProcessoDto.senha_inss || null,
-        data_atendimento:
-          createProcessoDto.data_atendimento ||
+        data_cadastro:
+          createProcessoDto.data_cadastro ||
           new Date().toISOString().split('T')[0],
         data_ultima_atualizacao:
           createProcessoDto.data_ultima_atualizacao ||
           new Date().toISOString().split('T')[0],
+        data_agendamento: createProcessoDto.data_agendamento || null,
         status: createProcessoDto.status,
+        tipo_agendamento: createProcessoDto.tipo_agendamento || null,
         observacoes: createProcessoDto.observacoes || null,
       });
 
       const processoSalvo = await manager.save(Processo, processo);
 
-      // Se há arquivo, salvar dentro da transação
       if (file) {
         try {
           const nomeCliente = clienteSalvo.nome.replace(/\s+/g, '_');
-          const dataAtendimento = (
-            createProcessoDto.data_atendimento ||
+          const dataCadastro = (
+            createProcessoDto.data_cadastro ||
             new Date().toISOString().split('T')[0]
           ).replace(/-/g, '');
           const extensao = file.originalname.split('.').pop();
-          const nomePersonalizado = `${nomeCliente}_${dataAtendimento}.${extensao}`;
+          const nomePersonalizado = `${nomeCliente}_${dataCadastro}.${extensao}`;
 
           const arquivo = await this.arquivoService.salvarArquivo(
             file,
@@ -126,7 +125,6 @@ export class ProcessosService {
           processoSalvo.arquivo_documentos = arquivo;
           await manager.save(Processo, processoSalvo);
 
-          // Registrar envio de documento se usuário informado
           if (usuarioLogado) {
             await this.auditoriaService.registrarEnvioDocumento(
               usuarioLogado,
@@ -137,12 +135,10 @@ export class ProcessosService {
             );
           }
         } catch (error) {
-          // Se falhar ao salvar arquivo, toda a transação será revertida
           throw new Error(`Erro ao salvar arquivo: ${error.message}`);
         }
       }
 
-      // Registrar criação de cliente se usuário informado
       if (usuarioLogado) {
         await this.auditoriaService.registrarCriacao(
           usuarioLogado,
@@ -154,7 +150,6 @@ export class ProcessosService {
           userAgent,
         );
 
-        // Registrar criação de processo
         await this.auditoriaService.registrarCriacao(
           usuarioLogado,
           TipoEntidade.PROCESSO,
@@ -196,6 +191,11 @@ export class ProcessosService {
       });
       if (!status) throw new Error('Status inválido');
 
+      const tipo_agendamento = await manager.findOne(TipoAgendamento, {
+        where: { id: dto.tipoAgendamentoId },
+      });
+      if (!tipo_agendamento) throw new Error('Tipo de agendamento inválido');
+
       const beneficio = await manager.findOne(Beneficio, {
         where: { id: dto.beneficioId },
       });
@@ -205,13 +205,14 @@ export class ProcessosService {
         olhar_inss: dto.olhar_inss,
         olhar_pje_creta: dto.olhar_pje_creta,
         senha_inss: dto.senha_inss,
-        data_atendimento: dto.data_atendimento,
+        data_cadastro: dto.data_cadastro,
         observacoes: dto.observacoes,
         data_ultima_atualizacao:
           dto.data_ultima_atualizacao || new Date().toISOString().split('T')[0],
         cliente: { id: clienteId },
         colaborador,
         status,
+        tipo_agendamento,
         beneficio,
       });
 
@@ -220,9 +221,9 @@ export class ProcessosService {
       if (file) {
         try {
           const nomeCliente = cliente.nome.replace(/\s+/g, '_');
-          const dataAtendimento = dto.data_atendimento.replace(/-/g, '');
+          const dataCadastro = dto.data_cadastro.replace(/-/g, '');
           const extensao = file.originalname.split('.').pop();
-          const nomePersonalizado = `${nomeCliente}_${dataAtendimento}.${extensao}`;
+          const nomePersonalizado = `${nomeCliente}_${dataCadastro}.${extensao}`;
 
           const arquivo = await this.arquivoService.salvarArquivo(
             file,
@@ -244,13 +245,16 @@ export class ProcessosService {
       relations: [
         'cliente',
         'status',
+        'tipo_agendamento',
         'beneficio',
         'arquivo_documentos',
         'colaborador',
       ],
+      order: {
+        data_ultima_atualizacao: 'DESC',
+      },
     });
 
-    // Transformar a resposta para incluir apenas id, nome e cargo do colaborador
     return processos.map((processo) => ({
       ...processo,
       colaborador: processo.colaborador
@@ -270,13 +274,16 @@ export class ProcessosService {
         'cliente',
         'status',
         'beneficio',
+        'tipo_agendamento',
         'cliente.endereco',
         'arquivo_documentos',
         'colaborador',
       ],
+      order: {
+        data_ultima_atualizacao: 'DESC',
+      },
     });
 
-    // Transformar a resposta para incluir apenas id, nome e cargo do colaborador
     return processos.map((processo) => ({
       ...processo,
       colaborador: processo.colaborador
@@ -302,6 +309,7 @@ export class ProcessosService {
         'cliente',
         'cliente.endereco',
         'status',
+        'tipo_agendamento',
         'beneficio',
         'arquivo_documentos',
         'colaborador',
@@ -312,7 +320,6 @@ export class ProcessosService {
       return null;
     }
 
-    // Transformar a resposta para incluir apenas id, nome e cargo do colaborador
     return {
       ...processo,
       colaborador: processo.colaborador
@@ -325,11 +332,21 @@ export class ProcessosService {
     };
   }
 
-  update(id: number, updateProcessoDto: UpdateProcessoDto) {
+  async update(
+    id: number,
+    updateProcessoDto: UpdateProcessoDto,
+    file?: Express.Multer.File,
+  ) {
+    if (file) {
+      await this.uploadDocumentos(id, file);
+    }
+
     const processo = this.processosRepository.create({
       id,
       ...updateProcessoDto,
+      data_ultima_atualizacao: new Date().toISOString().split('T')[0],
     });
+
     return this.processosRepository.save(processo);
   }
 
@@ -351,9 +368,9 @@ export class ProcessosService {
     }
 
     const nomeCliente = processo.cliente.nome.replace(/\s+/g, '_');
-    const dataAtendimento = processo.data_atendimento.replace(/-/g, '');
+    const dataCadastro = processo.data_cadastro.replace(/-/g, '');
     const extensao = file.originalname.split('.').pop();
-    const nomePersonalizado = `${nomeCliente}_${dataAtendimento}.${extensao}`;
+    const nomePersonalizado = `${nomeCliente}_${dataCadastro}.${extensao}`;
 
     if (processo.arquivo_documentos) {
       await this.arquivoService.deletarArquivo(processo.arquivo_documentos.id);

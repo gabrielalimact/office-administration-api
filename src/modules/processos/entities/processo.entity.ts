@@ -10,6 +10,7 @@ import { Cliente } from '../../cliente/entities/cliente.entity';
 import { Beneficio } from './beneficios.entity';
 import { Arquivo } from '../../arquivo/entities/arquivo.entity';
 import { Usuario } from '../../usuario/entity/usuario.entity';
+import { TipoAgendamento } from './agendamento.entity';
 
 @Entity('processos')
 export class Processo {
@@ -28,6 +29,9 @@ export class Processo {
   @ManyToOne(() => Beneficio)
   beneficio: Beneficio;
 
+  @ManyToOne(() => TipoAgendamento)
+  tipo_agendamento: TipoAgendamento;
+
   @Column({ default: false })
   arquivado: boolean;
 
@@ -41,7 +45,10 @@ export class Processo {
   senha_inss: string;
 
   @Column({ type: 'date' })
-  data_atendimento: string;
+  data_cadastro: string;
+
+  @Column({ type: 'date', nullable: true })
+  data_agendamento: string;
 
   @Column({ type: 'date' })
   data_ultima_atualizacao: string;

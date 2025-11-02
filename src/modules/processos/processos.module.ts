@@ -10,6 +10,7 @@ import { Beneficio } from './entities/beneficios.entity';
 import { ArquivoModule } from '../arquivo/arquivo.module';
 import { Usuario } from '../usuario/entity/usuario.entity';
 import { AuditoriaModule } from '../auditoria/auditoria.module';
+import { TipoAgendamento } from './entities/agendamento.entity';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AuditoriaModule } from '../auditoria/auditoria.module';
       StatusProcesso,
       Beneficio,
       Usuario,
+      TipoAgendamento,
     ]),
     ArquivoModule,
     AuditoriaModule,

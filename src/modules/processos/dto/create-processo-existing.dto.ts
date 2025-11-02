@@ -11,6 +11,9 @@ export class CreateProcessoExistingDto {
   statusId: number;
 
   @IsInt()
+  tipoAgendamentoId: number;
+
+  @IsInt()
   beneficioId: number;
 
   @IsInt()
@@ -27,11 +30,15 @@ export class CreateProcessoExistingDto {
   senha_inss?: string;
 
   @IsDateString()
-  data_atendimento: string;
+  data_cadastro: string;
 
   @IsDateString()
   @IsOptional()
   data_ultima_atualizacao: string;
+
+  @IsDateString()
+  @IsOptional()
+  data_agendamento: string;
 
   @IsString()
   @IsOptional()

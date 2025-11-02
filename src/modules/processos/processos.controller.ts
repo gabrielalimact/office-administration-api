@@ -66,7 +66,6 @@ export class ProcessosController {
     @UploadedFile() file: Express.Multer.File,
     @Req() request: Request,
   ) {
-    // Parse dos dados JSON enviados como multipart/form-data
     const createProcessoDto: CreateProcessoDto = {
       cliente:
         typeof body.cliente === 'string'
@@ -86,24 +85,21 @@ export class ProcessosController {
         body.olhar_pje_creta === true ||
         false,
       senha_inss: body.senha_inss || undefined,
-      data_atendimento: body.data_atendimento || undefined,
+      data_cadastro: body.data_cadastro || undefined,
+      data_agendamento: body.data_agendamento || undefined,
       data_ultima_atualizacao: body.data_ultima_atualizacao || undefined,
       status:
         typeof body.status === 'string' ? JSON.parse(body.status) : body.status,
+      tipo_agendamento:
+        typeof body.tipo_agendamento === 'string'
+          ? JSON.parse(body.tipo_agendamento)
+          : body.tipo_agendamento,
       observacoes: body.observacoes || undefined,
     };
 
     const usuario = request['user'];
-    const ipAddress = this.getClientIp(request);
-    const userAgent = request.headers['user-agent'] || '';
 
-    return this.processosService.create(
-      createProcessoDto,
-      file,
-      usuario,
-      ipAddress,
-      userAgent,
-    );
+    return this.processosService.create(createProcessoDto, file, usuario);
   }
 
   @Post('cliente/:clienteId')
@@ -167,11 +163,70 @@ export class ProcessosController {
   }
 
   @Patch(':id')
+  @UseInterceptors(
+    FileInterceptor('arquivo', {
+      storage: diskStorage({
+        destination: './documentos-clientes',
+        filename: (req, file, callback) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const ext = extname(file.originalname);
+          callback(null, `temp-${uniqueSuffix}${ext}`);
+        },
+      }),
+      fileFilter: (req, file, callback) => {
+        const allowedMimes = [
+          'application/zip',
+          'application/x-zip-compressed',
+          'application/x-rar-compressed',
+          'application/vnd.rar',
+        ];
+
+        if (
+          allowedMimes.includes(file.mimetype) ||
+          file.originalname.toLowerCase().endsWith('.zip') ||
+          file.originalname.toLowerCase().endsWith('.rar')
+        ) {
+          callback(null, true);
+        } else {
+          callback(null, false);
+        }
+      },
+      limits: {
+        fileSize: 100 * 1024 * 1024, // 100MB
+      },
+    }),
+  )
   update(
     @Param('id') id: string,
-    @Body() updateProcessoDto: UpdateProcessoDto,
+    @Body() body: any,
+    @UploadedFile() file?: Express.Multer.File,
   ) {
-    return this.processosService.update(+id, updateProcessoDto);
+    const updateProcessoDto: UpdateProcessoDto = {
+      colaboradorId: body.colaboradorId
+        ? parseInt(body.colaboradorId)
+        : undefined,
+      beneficio:
+        typeof body.beneficio === 'string'
+          ? JSON.parse(body.beneficio)
+          : body.beneficio,
+      olhar_inss: body.olhar_inss === 'true' || body.olhar_inss === true,
+      olhar_pje_creta:
+        body.olhar_pje_creta === 'true' || body.olhar_pje_creta === true,
+      senha_inss: body.senha_inss || undefined,
+      data_cadastro: body.data_cadastro || undefined,
+      data_agendamento: body.data_agendamento || undefined,
+      data_ultima_atualizacao: body.data_ultima_atualizacao || undefined,
+      status:
+        typeof body.status === 'string' ? JSON.parse(body.status) : body.status,
+      tipo_agendamento:
+        typeof body.tipo_agendamento === 'string'
+          ? JSON.parse(body.tipo_agendamento)
+          : body.tipo_agendamento,
+      observacoes: body.observacoes || undefined,
+    };
+
+    return this.processosService.update(+id, updateProcessoDto, file);
   }
 
   @Delete(':id')
@@ -213,7 +268,7 @@ export class ProcessosController {
         }
       },
       limits: {
-        fileSize: 100 * 1024 * 1024, // 100MB
+        fileSize: 100 * 1024 * 1024,
       },
     }),
   )
@@ -225,15 +280,5 @@ export class ProcessosController {
       throw new Error('Nenhum arquivo foi enviado');
     }
     return this.processosService.uploadDocumentos(+id, file);
-  }
-
-  private getClientIp(request: Request): string {
-    return (
-      (request.headers['x-forwarded-for'] as string)?.split(',')[0] ||
-      (request.headers['x-real-ip'] as string) ||
-      request.connection?.remoteAddress ||
-      request.socket?.remoteAddress ||
-      ''
-    );
   }
 }

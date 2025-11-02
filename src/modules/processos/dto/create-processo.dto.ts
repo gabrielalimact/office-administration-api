@@ -11,6 +11,7 @@ import {
 import { CreateClienteDto } from '../../cliente/dto/create-cliente.dto';
 import { StatusProcesso } from '../entities/status-processo.entity';
 import { Beneficio } from '../entities/beneficios.entity';
+import { TipoAgendamento } from '../entities/agendamento.entity';
 
 export class CreateProcessoDto {
   @ValidateNested()
@@ -41,7 +42,12 @@ export class CreateProcessoDto {
   @IsOptional()
   @IsString()
   @IsDateString()
-  data_atendimento?: string;
+  data_cadastro?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsDateString()
+  data_agendamento?: string;
 
   @IsOptional()
   @IsString()
@@ -51,6 +57,10 @@ export class CreateProcessoDto {
   @Type(() => StatusProcesso)
   @IsNotEmpty()
   status: StatusProcesso;
+
+  @IsOptional()
+  @Type(() => TipoAgendamento)
+  tipo_agendamento?: TipoAgendamento;
 
   @IsOptional()
   @IsString()
