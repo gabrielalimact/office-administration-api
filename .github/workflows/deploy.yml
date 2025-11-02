@@ -3,7 +3,7 @@ name: CI/CD - Office Administration
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   build-and-test:
