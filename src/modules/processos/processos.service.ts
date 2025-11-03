@@ -191,10 +191,13 @@ export class ProcessosService {
       });
       if (!status) throw new Error('Status inválido');
 
-      const tipo_agendamento = await manager.findOne(TipoAgendamento, {
-        where: { id: dto.tipoAgendamentoId },
-      });
-      if (!tipo_agendamento) throw new Error('Tipo de agendamento inválido');
+      let tipo_agendamento = null;
+      if (dto.tipoAgendamentoId) {
+        tipo_agendamento = await manager.findOne(TipoAgendamento, {
+          where: { id: dto.tipoAgendamentoId },
+        });
+        if (!tipo_agendamento) throw new Error('Tipo de agendamento inválido');
+      }
 
       const beneficio = await manager.findOne(Beneficio, {
         where: { id: dto.beneficioId },

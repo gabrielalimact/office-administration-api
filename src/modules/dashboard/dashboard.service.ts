@@ -28,8 +28,19 @@ export class DashboardService {
       .leftJoin('processo.beneficio', 'beneficio')
       .select('beneficio.nome', 'beneficio')
       .addSelect('COUNT(processo.id)', 'quantidade')
+      .where('processo.arquivado = :arquivado', { arquivado: false })
       .groupBy('beneficio.id')
       .addGroupBy('beneficio.nome')
+      .getRawMany();
+
+    const processosPorStatus = await this.processosRepository
+      .createQueryBuilder('processo')
+      .leftJoin('processo.status', 'status')
+      .select('status.nome', 'status')
+      .addSelect('COUNT(processo.id)', 'quantidade')
+      .where('processo.arquivado = :arquivado', { arquivado: false })
+      .groupBy('status.id')
+      .addGroupBy('status.nome')
       .getRawMany();
 
     const processosPorTipoAgendamento = await this.processosRepository
@@ -60,6 +71,10 @@ export class DashboardService {
       processosAtivos,
       processosPorBeneficio: processosPorBeneficio.map((item) => ({
         beneficio: item.beneficio,
+        quantidade: parseInt(item.quantidade, 10),
+      })),
+      processosPorStatus: processosPorStatus.map((item) => ({
+        status: item.status,
         quantidade: parseInt(item.quantidade, 10),
       })),
       processosPorTipoAgendamento: processosPorTipoAgendamento.map((item) => ({

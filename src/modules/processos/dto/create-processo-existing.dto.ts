@@ -10,8 +10,9 @@ export class CreateProcessoExistingDto {
   @IsInt()
   statusId: number;
 
+  @IsOptional()
   @IsInt()
-  tipoAgendamentoId: number;
+  tipoAgendamentoId?: number;
 
   @IsInt()
   beneficioId: number;
