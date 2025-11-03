@@ -47,7 +47,7 @@ export class Processo {
   @Column({ type: 'date' })
   data_cadastro: string;
 
-  @Column({ type: 'date', nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   data_agendamento: string;
 
   @Column({ type: 'date' })
