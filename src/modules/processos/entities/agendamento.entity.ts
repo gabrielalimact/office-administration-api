@@ -5,6 +5,6 @@ export class TipoAgendamento {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
+  @Column({ length: 100 })
   nome: string;
 }
