@@ -32,6 +32,19 @@ export class DashboardService {
       .addGroupBy('beneficio.nome')
       .getRawMany();
 
+    const processosPorTipoAgendamento = await this.processosRepository
+      .createQueryBuilder('processo')
+      .leftJoin('processo.tipo_agendamento', 'tipo_agendamento')
+      .select(
+        "COALESCE(tipo_agendamento.nome, 'Sem tipo definido')",
+        'tipo_agendamento',
+      )
+      .addSelect('COUNT(processo.id)', 'quantidade')
+      .where('processo.arquivado = :arquivado', { arquivado: false })
+      .groupBy('tipo_agendamento.id')
+      .addGroupBy('tipo_agendamento.nome')
+      .getRawMany();
+
     const clientesComProcessosAtivosResult = await this.clientesRepository
       .createQueryBuilder('cliente')
       .innerJoin('cliente.processos', 'processo')
@@ -50,6 +63,10 @@ export class DashboardService {
       processosAtivos,
       processosPorBeneficio: processosPorBeneficio.map((item) => ({
         beneficio: item.beneficio,
+        quantidade: parseInt(item.quantidade, 10),
+      })),
+      processosPorTipoAgendamento: processosPorTipoAgendamento.map((item) => ({
+        tipo_agendamento: item.tipo_agendamento,
         quantidade: parseInt(item.quantidade, 10),
       })),
       clientesComProcessosAtivos,
