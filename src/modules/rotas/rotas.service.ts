@@ -4,6 +4,17 @@ import { PATH_METADATA, METHOD_METADATA } from '@nestjs/common/constants';
 import { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
 import { RouteInfo } from './interfaces/route-info.interface';
 
+// Mapeamento dos métodos HTTP do NestJS
+const HTTP_METHODS_MAP = {
+  0: 'GET',
+  1: 'POST',
+  2: 'PUT',
+  3: 'DELETE',
+  4: 'PATCH',
+  5: 'OPTIONS',
+  6: 'HEAD',
+};
+
 @Injectable()
 export class RotasService {
   constructor(
@@ -42,10 +53,27 @@ export class RotasService {
           // Obter metadados da rota
           const routePath =
             this.reflector.get<string>(PATH_METADATA, method) || '';
-          const httpMethod = this.reflector.get<string>(
-            METHOD_METADATA,
-            method,
-          );
+          const httpMethodData = this.reflector.get(METHOD_METADATA, method);
+
+          // Determinar o método HTTP
+          let httpMethod: string | null = null;
+
+          if (typeof httpMethodData === 'string') {
+            httpMethod = httpMethodData;
+          } else if (typeof httpMethodData === 'number') {
+            // Usar o mapeamento para números
+            httpMethod = HTTP_METHODS_MAP[httpMethodData] || null;
+          } else if (
+            Array.isArray(httpMethodData) &&
+            httpMethodData.length > 0
+          ) {
+            const firstMethod = httpMethodData[0];
+            if (typeof firstMethod === 'string') {
+              httpMethod = firstMethod;
+            } else if (typeof firstMethod === 'number') {
+              httpMethod = HTTP_METHODS_MAP[firstMethod] || null;
+            }
+          }
 
           if (httpMethod) {
             const fullPath = this.buildFullPath(controllerPath, routePath);
