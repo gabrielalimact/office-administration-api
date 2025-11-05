@@ -13,6 +13,7 @@ import { ArquivoModule } from './modules/arquivo/arquivo.module';
 import { BeneficiosModule } from './modules/beneficios/beneficios.module';
 import { StatusProcessoModule } from './modules/status-processo/status-processo.module';
 import { AuditoriaModule } from './modules/auditoria/auditoria.module';
+import { RotasModule } from './modules/rotas/rotas.module';
 import * as dotenv from 'dotenv';
 import { TipoAgendamentoModule } from './modules/agendamento/agendamento.module';
 dotenv.config();
@@ -40,6 +41,7 @@ dotenv.config();
     StatusProcessoModule,
     TipoAgendamentoModule,
     AuditoriaModule,
+    RotasModule,
   ],
   controllers: [AppController],
   providers: [AppService],
