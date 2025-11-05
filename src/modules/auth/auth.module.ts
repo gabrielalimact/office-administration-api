@@ -9,11 +9,12 @@ import { Processo } from '../processos/entities/processo.entity';
 import { UsuarioService } from '../usuario/usuario.service';
 import { JwtStrategy } from './jwt/jwt.strategy';
 import { ArquivoModule } from '../arquivo/arquivo.module';
+import { Arquivo } from '../arquivo/entities/arquivo.entity';
 
 @Module({
   imports: [
     PassportModule,
-    TypeOrmModule.forFeature([Usuario, Processo]),
+    TypeOrmModule.forFeature([Usuario, Processo, Arquivo]),
     ArquivoModule,
     JwtModule.register({
       secret: process.env.JWT_ACCESS_SECRET || 'segredo_super_secreto',

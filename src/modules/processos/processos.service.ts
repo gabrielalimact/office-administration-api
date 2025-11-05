@@ -87,6 +87,7 @@ export class ProcessosService {
         naturalidade: createProcessoDto.cliente.naturalidade || null,
         endereco,
       });
+
       const clienteSalvo = await manager.save(Cliente, cliente);
 
       const processo = manager.create(Processo, {
@@ -120,15 +121,25 @@ export class ProcessosService {
           const extensao = file.originalname.split('.').pop();
           const nomePersonalizado = `${nomeCliente}_${dataCadastro}.${extensao}`;
 
-          const arquivo = await this.arquivoService.salvarArquivo(
+          const dadosArquivo = await this.arquivoService.salvarArquivo(
             file,
             nomePersonalizado,
-            manager,
-            false,
           );
 
-          // Estabelecer a relação com o processo dentro da transação
-          arquivo.processo = processoSalvo;
+          const arquivo = manager.create(Arquivo, {
+            nome_original: dadosArquivo.nome_original,
+            nome_arquivo: dadosArquivo.nome_arquivo,
+            caminho: dadosArquivo.caminho,
+            tamanho: dadosArquivo.tamanho,
+            tipo_mime: dadosArquivo.tipo_mime,
+            processo: { id: processo.id } as any,
+          });
+          console.log('[Arquivo->save] processoId=', processoSalvo.id);
+          console.log('[Arquivo->save] payload=', {
+            nome_arquivo: dadosArquivo.nome_arquivo,
+            hasProcesso: !!(arquivo as any).processo,
+            processoIdInPayload: (arquivo as any).processo?.id ?? null,
+          });
           await manager.save(Arquivo, arquivo);
 
           if (usuarioLogado) {
@@ -234,15 +245,25 @@ export class ProcessosService {
           const extensao = file.originalname.split('.').pop();
           const nomePersonalizado = `${nomeCliente}_${dataCadastro}.${extensao}`;
 
-          const arquivo = await this.arquivoService.salvarArquivo(
+          const dadosArquivo = await this.arquivoService.salvarArquivo(
             file,
             nomePersonalizado,
-            manager,
-            false,
           );
 
-          // Estabelecer a relação com o processo dentro da transação
-          arquivo.processo = processoSalvo;
+          const arquivo = manager.create(Arquivo, {
+            nome_original: dadosArquivo.nome_original,
+            nome_arquivo: dadosArquivo.nome_arquivo,
+            caminho: dadosArquivo.caminho,
+            tamanho: dadosArquivo.tamanho,
+            tipo_mime: dadosArquivo.tipo_mime,
+            processo: { id: processoSalvo.id } as any,
+          });
+          console.log('[Arquivo->save] processoId=', processoSalvo.id);
+          console.log('[Arquivo->save] payload=', {
+            nome_arquivo: dadosArquivo.nome_arquivo,
+            hasProcesso: !!(arquivo as any).processo,
+            processoIdInPayload: (arquivo as any).processo?.id ?? null,
+          });
           await manager.save(Arquivo, arquivo);
         } catch (error) {
           throw new Error(`Erro ao salvar arquivo: ${error.message}`);
@@ -259,7 +280,6 @@ export class ProcessosService {
         'status',
         'tipo_agendamento',
         'beneficio',
-        'arquivo_documentos',
         'documentos',
         'colaborador',
       ],
@@ -350,17 +370,49 @@ export class ProcessosService {
     updateProcessoDto: UpdateProcessoDto,
     file?: Express.Multer.File,
   ) {
-    if (file) {
-      await this.uploadDocumentos(id, file);
-    }
-
-    const processo = this.processosRepository.create({
-      id,
-      ...updateProcessoDto,
-      data_ultima_atualizacao: new Date().toISOString().split('T')[0],
+    const processo = await this.processosRepository.findOne({
+      where: { id },
+      relations: ['cliente', 'documentos'],
     });
 
-    return this.processosRepository.save(processo);
+    if (!processo) {
+      throw new Error('Processo não encontrado');
+    }
+
+    Object.assign(processo, updateProcessoDto);
+    processo.data_ultima_atualizacao = new Date().toISOString().split('T')[0];
+
+    const processoSalvo = await this.processosRepository.save(processo);
+
+    if (file) {
+      const nomeCliente = processo.cliente.nome.replace(/\s+/g, '_');
+      const dataCadastro = processo.data_cadastro.replace(/-/g, '');
+      const extensao = file.originalname.split('.').pop();
+      const nomePersonalizado = `${nomeCliente}_${dataCadastro}_${Date.now()}.${extensao}`;
+
+      const dadosArquivo = await this.arquivoService.salvarArquivo(
+        file,
+        nomePersonalizado,
+      );
+
+      const arquivo = this.arquivoRepository.create({
+        nome_original: dadosArquivo.nome_original,
+        nome_arquivo: dadosArquivo.nome_arquivo,
+        caminho: dadosArquivo.caminho,
+        tamanho: dadosArquivo.tamanho,
+        tipo_mime: dadosArquivo.tipo_mime,
+        processo: { id: processo.id } as any,
+      });
+      console.log('[Arquivo->save] processoId=', processoSalvo.id);
+      console.log('[Arquivo->save] payload=', {
+        nome_arquivo: dadosArquivo.nome_arquivo,
+        hasProcesso: !!(arquivo as any).processo,
+        processoIdInPayload: (arquivo as any).processo?.id ?? null,
+      });
+      await this.arquivoRepository.save(arquivo);
+    }
+
+    return processoSalvo;
   }
 
   remove(id: number) {
@@ -386,23 +438,23 @@ export class ProcessosService {
     const extensao = file.originalname.split('.').pop();
     const nomePersonalizado = `${nomeCliente}_${dataCadastro}_${timestamp}.${extensao}`;
 
-    // Adiciona o novo documento ao invés de substituir
-    const arquivo = await this.arquivoService.salvarArquivo(
+    const dadosArquivo = await this.arquivoService.salvarArquivo(
       file,
       nomePersonalizado,
-      null,
-      false,
     );
 
-    // Estabelecer a relação com o processo
-    await this.arquivoRepository.update(arquivo.id, {
-      processo: { id: processoId } as any,
+    const arquivo = this.arquivoRepository.create({
+      nome_original: dadosArquivo.nome_original,
+      nome_arquivo: dadosArquivo.nome_arquivo,
+      caminho: dadosArquivo.caminho,
+      tamanho: dadosArquivo.tamanho,
+      tipo_mime: dadosArquivo.tipo_mime,
+      processo: { id: processoId },
     });
 
-    // Atualiza a data de última atualização do processo
-    processo.data_ultima_atualizacao = new Date().toISOString().split('T')[0];
+    await this.arquivoRepository.save(arquivo);
 
-    return this.processosRepository.save(processo);
+    return processo;
   }
 
   async listarDocumentosProcesso(processoId: number): Promise<any[]> {
@@ -422,7 +474,6 @@ export class ProcessosService {
     processoId: number,
     documentoId: number,
   ): Promise<void> {
-    // Verificar se o processo existe
     const processo = await this.processosRepository.findOne({
       where: { id: processoId },
     });
@@ -431,13 +482,11 @@ export class ProcessosService {
       throw new Error('Processo não encontrado');
     }
 
-    // Verificar se o documento pertence ao processo
     const documento = await this.arquivoService.buscarPorId(documentoId);
     if (!documento) {
       throw new Error('Documento não encontrado');
     }
 
-    // Verificar se o documento está associado ao processo correto
     const documentosProcesso =
       await this.arquivoService.buscarPorProcesso(processoId);
     const documentoValido = documentosProcesso.find(
@@ -448,10 +497,8 @@ export class ProcessosService {
       throw new Error('Documento não pertence a este processo');
     }
 
-    // Deletar o documento
     await this.arquivoService.deletarArquivo(documentoId);
 
-    // Atualizar data de última atualização do processo
     processo.data_ultima_atualizacao = new Date().toISOString().split('T')[0];
     await this.processosRepository.save(processo);
   }

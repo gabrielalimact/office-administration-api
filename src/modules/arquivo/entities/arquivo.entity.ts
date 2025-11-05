@@ -32,7 +32,7 @@ export class Arquivo {
   data_upload: Date;
 
   @ManyToOne(() => Processo, (processo) => processo.documentos, {
-    nullable: true,
+    nullable: false,
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'processo_id' })

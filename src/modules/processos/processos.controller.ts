@@ -228,9 +228,7 @@ export class ProcessosController {
           callback(null, false);
         }
       },
-      limits: {
-        fileSize: 100 * 1024 * 1024, // 100MB
-      },
+      limits: { fileSize: 100 * 1024 * 1024 },
     }),
   )
   update(
@@ -324,6 +322,9 @@ export class ProcessosController {
     @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
+    console.log('🔥 ENTROU NA ROTA /documentos');
+    console.log('📁 File recebido:', file);
+
     if (!file) {
       throw new Error('Nenhum arquivo foi enviado');
     }

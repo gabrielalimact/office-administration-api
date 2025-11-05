@@ -12,7 +12,6 @@ import {
   Patch,
   UseGuards,
   UseInterceptors,
-  UploadedFile,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UsuarioService } from './usuario.service';
@@ -28,21 +27,6 @@ export class UsuarioController {
   @HttpCode(HttpStatus.CREATED)
   criar(@Body() dto: UsuarioDto): Promise<void> {
     return this.usuarioService.criar(dto);
-  }
-
-  @Post('com-imagem')
-  @UseInterceptors(
-    FileInterceptor('imagem', {
-      dest: './imagens',
-      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
-    }),
-  )
-  @HttpCode(HttpStatus.CREATED)
-  async criarComImagem(
-    @Body() dto: UsuarioDto,
-    @UploadedFile() file?: Express.Multer.File,
-  ) {
-    return this.usuarioService.criarComImagem(dto, file);
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -76,27 +60,12 @@ export class UsuarioController {
   async atualizarCompleto(
     @Param('id') id: string,
     @Body() dto: Partial<UsuarioDto>,
-    @UploadedFile() file?: Express.Multer.File,
   ) {
-    return this.usuarioService.atualizarCompleto(+id, dto, file);
+    return this.usuarioService.atualizarCompleto(+id, dto);
   }
 
   @Delete(':id')
   delete(@Param('id') id: string) {
     return this.usuarioService.deletar(+id);
-  }
-
-  @Post(':id/avatar')
-  @UseInterceptors(
-    FileInterceptor('avatar', {
-      dest: './imagens',
-      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
-    }),
-  )
-  async uploadAvatar(
-    @Param('id') id: string,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    return this.usuarioService.uploadAvatar(+id, file);
   }
 }

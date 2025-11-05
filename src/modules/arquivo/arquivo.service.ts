@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, EntityManager } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Response } from 'express';
 import { Arquivo } from './entities/arquivo.entity';
 import * as fs from 'fs';
@@ -16,14 +16,11 @@ export class ArquivoService {
   async salvarArquivo(
     file: Express.Multer.File,
     nomePersonalizado?: string,
-    manager?: EntityManager,
     isAvatar?: boolean,
-  ): Promise<Arquivo> {
+  ) {
     const baseDir = isAvatar ? './imagens' : './documentos-clientes';
 
-    if (!fs.existsSync(baseDir)) {
-      fs.mkdirSync(baseDir, { recursive: true });
-    }
+    if (!fs.existsSync(baseDir)) fs.mkdirSync(baseDir, { recursive: true });
 
     const ext = path.extname(file.originalname) || '';
     const nomeArquivoFinal =
@@ -32,26 +29,15 @@ export class ArquivoService {
 
     const novoCaminho = path.join(baseDir, nomeArquivoFinal);
 
-    try {
-      fs.renameSync(file.path, novoCaminho);
-    } catch (error) {
-      console.error('Erro ao mover arquivo:', error);
-      throw new Error(`Erro ao processar arquivo: ${error.message}`);
-    }
+    fs.renameSync(file.path, novoCaminho);
 
-    const arquivo = {
+    return {
       nome_original: file.originalname,
       nome_arquivo: nomeArquivoFinal,
       caminho: novoCaminho,
       tamanho: file.size,
       tipo_mime: file.mimetype,
     };
-
-    if (manager) {
-      return manager.save(Arquivo, manager.create(Arquivo, arquivo));
-    }
-
-    return this.arquivoRepository.save(this.arquivoRepository.create(arquivo));
   }
 
   async buscarPorId(id: number): Promise<Arquivo | null> {
