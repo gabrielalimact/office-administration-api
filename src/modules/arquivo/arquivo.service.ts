@@ -73,6 +73,13 @@ export class ArquivoService {
     return this.arquivoRepository.find();
   }
 
+  async buscarPorProcesso(processoId: number): Promise<Arquivo[]> {
+    return this.arquivoRepository.find({
+      where: { processo: { id: processoId } },
+      order: { data_upload: 'DESC' },
+    });
+  }
+
   async downloadArquivo(id: number, res: Response): Promise<void> {
     const arquivo = await this.buscarPorId(id);
     if (!arquivo) throw new Error('Arquivo não encontrado');

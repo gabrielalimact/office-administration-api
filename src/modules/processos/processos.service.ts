@@ -14,6 +14,7 @@ import { Usuario } from '../usuario/entity/usuario.entity';
 import { AuditoriaService } from '../auditoria/auditoria.service';
 import { TipoEntidade } from '../auditoria/entities/auditoria-log.entity';
 import { TipoAgendamento } from './entities/agendamento.entity';
+import { Arquivo } from '../arquivo/entities/arquivo.entity';
 
 @Injectable()
 export class ProcessosService {
@@ -35,6 +36,9 @@ export class ProcessosService {
 
     @InjectRepository(Usuario)
     private readonly usuarioRepository: Repository<Usuario>,
+
+    @InjectRepository(Arquivo)
+    private readonly arquivoRepository: Repository<Arquivo>,
 
     private readonly arquivoService: ArquivoService,
     private readonly dataSource: DataSource,
@@ -120,10 +124,12 @@ export class ProcessosService {
             file,
             nomePersonalizado,
             manager,
+            false,
           );
 
-          processoSalvo.arquivo_documentos = arquivo;
-          await manager.save(Processo, processoSalvo);
+          // Estabelecer a relação com o processo dentro da transação
+          arquivo.processo = processoSalvo;
+          await manager.save(Arquivo, arquivo);
 
           if (usuarioLogado) {
             await this.auditoriaService.registrarEnvioDocumento(
@@ -232,9 +238,12 @@ export class ProcessosService {
             file,
             nomePersonalizado,
             manager,
+            false,
           );
-          processoSalvo.arquivo_documentos = arquivo;
-          await manager.save(Processo, processoSalvo);
+
+          // Estabelecer a relação com o processo dentro da transação
+          arquivo.processo = processoSalvo;
+          await manager.save(Arquivo, arquivo);
         } catch (error) {
           throw new Error(`Erro ao salvar arquivo: ${error.message}`);
         }
@@ -251,6 +260,7 @@ export class ProcessosService {
         'tipo_agendamento',
         'beneficio',
         'arquivo_documentos',
+        'documentos',
         'colaborador',
       ],
       order: {
@@ -279,7 +289,7 @@ export class ProcessosService {
         'beneficio',
         'tipo_agendamento',
         'cliente.endereco',
-        'arquivo_documentos',
+        'documentos',
         'colaborador',
       ],
       order: {
@@ -314,7 +324,7 @@ export class ProcessosService {
         'status',
         'tipo_agendamento',
         'beneficio',
-        'arquivo_documentos',
+        'documentos',
         'colaborador',
       ],
     });
@@ -363,7 +373,7 @@ export class ProcessosService {
   ): Promise<Processo> {
     const processo = await this.processosRepository.findOne({
       where: { id: processoId },
-      relations: ['cliente', 'arquivo_documentos'],
+      relations: ['cliente', 'documentos'],
     });
 
     if (!processo) {
@@ -372,19 +382,77 @@ export class ProcessosService {
 
     const nomeCliente = processo.cliente.nome.replace(/\s+/g, '_');
     const dataCadastro = processo.data_cadastro.replace(/-/g, '');
+    const timestamp = Date.now();
     const extensao = file.originalname.split('.').pop();
-    const nomePersonalizado = `${nomeCliente}_${dataCadastro}.${extensao}`;
+    const nomePersonalizado = `${nomeCliente}_${dataCadastro}_${timestamp}.${extensao}`;
 
-    if (processo.arquivo_documentos) {
-      await this.arquivoService.deletarArquivo(processo.arquivo_documentos.id);
-    }
-
+    // Adiciona o novo documento ao invés de substituir
     const arquivo = await this.arquivoService.salvarArquivo(
       file,
       nomePersonalizado,
+      null,
+      false,
     );
 
-    processo.arquivo_documentos = arquivo;
+    // Estabelecer a relação com o processo
+    await this.arquivoRepository.update(arquivo.id, {
+      processo: { id: processoId } as any,
+    });
+
+    // Atualiza a data de última atualização do processo
+    processo.data_ultima_atualizacao = new Date().toISOString().split('T')[0];
+
     return this.processosRepository.save(processo);
+  }
+
+  async listarDocumentosProcesso(processoId: number): Promise<any[]> {
+    const documentos = await this.arquivoService.buscarPorProcesso(processoId);
+
+    return documentos.map((doc) => ({
+      id: doc.id,
+      nome_original: doc.nome_original,
+      nome_arquivo: doc.nome_arquivo,
+      tamanho: doc.tamanho,
+      tipo_mime: doc.tipo_mime,
+      data_upload: doc.data_upload,
+    }));
+  }
+
+  async removerDocumento(
+    processoId: number,
+    documentoId: number,
+  ): Promise<void> {
+    // Verificar se o processo existe
+    const processo = await this.processosRepository.findOne({
+      where: { id: processoId },
+    });
+
+    if (!processo) {
+      throw new Error('Processo não encontrado');
+    }
+
+    // Verificar se o documento pertence ao processo
+    const documento = await this.arquivoService.buscarPorId(documentoId);
+    if (!documento) {
+      throw new Error('Documento não encontrado');
+    }
+
+    // Verificar se o documento está associado ao processo correto
+    const documentosProcesso =
+      await this.arquivoService.buscarPorProcesso(processoId);
+    const documentoValido = documentosProcesso.find(
+      (d) => d.id === documentoId,
+    );
+
+    if (!documentoValido) {
+      throw new Error('Documento não pertence a este processo');
+    }
+
+    // Deletar o documento
+    await this.arquivoService.deletarArquivo(documentoId);
+
+    // Atualizar data de última atualização do processo
+    processo.data_ultima_atualizacao = new Date().toISOString().split('T')[0];
+    await this.processosRepository.save(processo);
   }
 }

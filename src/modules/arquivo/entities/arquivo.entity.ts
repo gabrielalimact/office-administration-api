@@ -3,7 +3,10 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
+import { Processo } from '../../processos/entities/processo.entity';
 
 @Entity('arquivos')
 export class Arquivo {
@@ -27,4 +30,11 @@ export class Arquivo {
 
   @CreateDateColumn()
   data_upload: Date;
+
+  @ManyToOne(() => Processo, (processo) => processo.documentos, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'processo_id' })
+  processo?: Processo;
 }

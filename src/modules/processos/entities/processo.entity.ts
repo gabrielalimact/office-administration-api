@@ -4,6 +4,7 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { StatusProcesso } from './status-processo.entity';
 import { Cliente } from '../../cliente/entities/cliente.entity';
@@ -59,7 +60,8 @@ export class Processo {
   @Column({ type: 'text', nullable: true })
   observacoes: string;
 
-  @ManyToOne(() => Arquivo, { nullable: true })
-  @JoinColumn({ name: 'id_arquivo_documentos' })
-  arquivo_documentos?: Arquivo;
+  @OneToMany(() => Arquivo, (arquivo) => arquivo.processo, {
+    cascade: true,
+  })
+  documentos: Arquivo[];
 }

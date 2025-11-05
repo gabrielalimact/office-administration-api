@@ -44,12 +44,24 @@ export class ProcessosController {
           'application/x-zip-compressed',
           'application/x-rar-compressed',
           'application/vnd.rar',
+          'application/pdf',
+          'image/jpeg',
+          'image/jpg',
+          'image/png',
+          'image/gif',
+          'image/webp',
         ];
 
         if (
           allowedMimes.includes(file.mimetype) ||
           file.originalname.toLowerCase().endsWith('.zip') ||
-          file.originalname.toLowerCase().endsWith('.rar')
+          file.originalname.toLowerCase().endsWith('.rar') ||
+          file.originalname.toLowerCase().endsWith('.pdf') ||
+          file.originalname.toLowerCase().endsWith('.jpg') ||
+          file.originalname.toLowerCase().endsWith('.jpeg') ||
+          file.originalname.toLowerCase().endsWith('.png') ||
+          file.originalname.toLowerCase().endsWith('.gif') ||
+          file.originalname.toLowerCase().endsWith('.webp')
         ) {
           callback(null, true);
         } else {
@@ -120,12 +132,24 @@ export class ProcessosController {
           'application/x-zip-compressed',
           'application/x-rar-compressed',
           'application/vnd.rar',
+          'application/pdf',
+          'image/jpeg',
+          'image/jpg',
+          'image/png',
+          'image/gif',
+          'image/webp',
         ];
 
         if (
           allowedMimes.includes(file.mimetype) ||
           file.originalname.toLowerCase().endsWith('.zip') ||
-          file.originalname.toLowerCase().endsWith('.rar')
+          file.originalname.toLowerCase().endsWith('.rar') ||
+          file.originalname.toLowerCase().endsWith('.pdf') ||
+          file.originalname.toLowerCase().endsWith('.jpg') ||
+          file.originalname.toLowerCase().endsWith('.jpeg') ||
+          file.originalname.toLowerCase().endsWith('.png') ||
+          file.originalname.toLowerCase().endsWith('.gif') ||
+          file.originalname.toLowerCase().endsWith('.webp')
         ) {
           callback(null, true);
         } else {
@@ -180,12 +204,24 @@ export class ProcessosController {
           'application/x-zip-compressed',
           'application/x-rar-compressed',
           'application/vnd.rar',
+          'application/pdf',
+          'image/jpeg',
+          'image/jpg',
+          'image/png',
+          'image/gif',
+          'image/webp',
         ];
 
         if (
           allowedMimes.includes(file.mimetype) ||
           file.originalname.toLowerCase().endsWith('.zip') ||
-          file.originalname.toLowerCase().endsWith('.rar')
+          file.originalname.toLowerCase().endsWith('.rar') ||
+          file.originalname.toLowerCase().endsWith('.pdf') ||
+          file.originalname.toLowerCase().endsWith('.jpg') ||
+          file.originalname.toLowerCase().endsWith('.jpeg') ||
+          file.originalname.toLowerCase().endsWith('.png') ||
+          file.originalname.toLowerCase().endsWith('.gif') ||
+          file.originalname.toLowerCase().endsWith('.webp')
         ) {
           callback(null, true);
         } else {
@@ -252,17 +288,29 @@ export class ProcessosController {
           'application/x-zip-compressed',
           'application/x-rar-compressed',
           'application/vnd.rar',
+          'application/pdf',
+          'image/jpeg',
+          'image/jpg',
+          'image/png',
+          'image/gif',
+          'image/webp',
         ];
 
         if (
           allowedMimes.includes(file.mimetype) ||
           file.originalname.toLowerCase().endsWith('.zip') ||
-          file.originalname.toLowerCase().endsWith('.rar')
+          file.originalname.toLowerCase().endsWith('.rar') ||
+          file.originalname.toLowerCase().endsWith('.pdf') ||
+          file.originalname.toLowerCase().endsWith('.jpg') ||
+          file.originalname.toLowerCase().endsWith('.jpeg') ||
+          file.originalname.toLowerCase().endsWith('.png') ||
+          file.originalname.toLowerCase().endsWith('.gif') ||
+          file.originalname.toLowerCase().endsWith('.webp')
         ) {
           callback(null, true);
         } else {
           callback(
-            new Error('Apenas arquivos ZIP e RAR são permitidos'),
+            new Error('Apenas arquivos ZIP, RAR, PDF e imagens são permitidos'),
             false,
           );
         }
@@ -280,5 +328,18 @@ export class ProcessosController {
       throw new Error('Nenhum arquivo foi enviado');
     }
     return this.processosService.uploadDocumentos(+id, file);
+  }
+
+  @Get(':id/documentos')
+  async listarDocumentos(@Param('id') id: string) {
+    return this.processosService.listarDocumentosProcesso(+id);
+  }
+
+  @Delete(':id/documentos/:documentoId')
+  async removerDocumento(
+    @Param('id') id: string,
+    @Param('documentoId') documentoId: string,
+  ) {
+    return this.processosService.removerDocumento(+id, +documentoId);
   }
 }

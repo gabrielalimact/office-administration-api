@@ -3,6 +3,7 @@ import { UpdateClienteDto } from './dto/update-cliente.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cliente } from './entities/cliente.entity';
+import { Endereco } from '../enderecos/entities/endereco.entity';
 import { AuditoriaService } from '../auditoria/auditoria.service';
 import { TipoEntidade } from '../auditoria/entities/auditoria-log.entity';
 import { Usuario } from '../usuario/entity/usuario.entity';
@@ -12,6 +13,8 @@ export class ClienteService {
   constructor(
     @InjectRepository(Cliente)
     private readonly clienteRepository: Repository<Cliente>,
+    @InjectRepository(Endereco)
+    private readonly enderecosRepository: Repository<Endereco>,
     private readonly auditoriaService: AuditoriaService,
   ) {}
 
@@ -24,11 +27,10 @@ export class ClienteService {
         'processos.beneficio',
         'processos.tipo_agendamento',
         'processos.colaborador',
-        'processos.arquivo_documentos',
+        'processos.documentos',
       ],
     });
 
-    // Transformar a resposta para incluir apenas id, nome e cargo do colaborador
     return clientes.map((cliente) => ({
       ...cliente,
       processos: cliente.processos.map((processo) => ({
@@ -54,7 +56,7 @@ export class ClienteService {
         'processos.beneficio',
         'processos.tipo_agendamento',
         'processos.colaborador',
-        'processos.arquivo_documentos',
+        'processos.documentos',
       ],
     });
 
@@ -62,7 +64,6 @@ export class ClienteService {
       return null;
     }
 
-    // Transformar a resposta para incluir apenas id, nome e cargo do colaborador
     return {
       ...cliente,
       processos: cliente.processos.map((processo) => ({
@@ -85,7 +86,6 @@ export class ClienteService {
     ipAddress?: string,
     userAgent?: string,
   ) {
-    // Buscar dados anteriores para auditoria
     const clienteAnterior = await this.clienteRepository.findOne({
       where: { id },
       relations: ['endereco'],
@@ -95,16 +95,59 @@ export class ClienteService {
       throw new Error('Cliente não encontrado');
     }
 
-    // Atualizar cliente
-    const resultado = await this.clienteRepository.update(id, updateClienteDto);
+    const dadosLimpos = { ...updateClienteDto };
 
-    // Buscar dados novos após atualização
+    const dadosEndereco = dadosLimpos.endereco;
+    delete dadosLimpos.endereco;
+
+    if (dadosLimpos.data_nascimento === '') {
+      dadosLimpos.data_nascimento = null;
+    }
+
+    Object.keys(dadosLimpos).forEach((key) => {
+      if (dadosLimpos[key] === '' && key !== 'data_nascimento') {
+        dadosLimpos[key] = null;
+      }
+    });
+
+    const resultado = await this.clienteRepository.update(id, dadosLimpos);
+
+    if (dadosEndereco) {
+      console.log('Dados de endereço recebidos:', dadosEndereco);
+      console.log('Cliente anterior tem endereço?', !!clienteAnterior.endereco);
+
+      const enderecoLimpo = {
+        logradouro: dadosEndereco.logradouro || '',
+        numero: dadosEndereco.numero || '',
+        complemento: dadosEndereco.complemento || '',
+        bairro: dadosEndereco.bairro || '',
+        cidade: dadosEndereco.cidade || '',
+        estado: dadosEndereco.estado || '',
+        cep: dadosEndereco.cep || '',
+      };
+      if (clienteAnterior.endereco) {
+        console.log(
+          'Atualizando endereço existente ID:',
+          clienteAnterior.endereco.id,
+        );
+        await this.enderecosRepository.update(
+          clienteAnterior.endereco.id,
+          enderecoLimpo,
+        );
+      } else {
+        console.log('Criando novo endereço para cliente');
+        const novoEndereco = this.enderecosRepository.create(enderecoLimpo);
+        const enderecoSalvo = await this.enderecosRepository.save(novoEndereco);
+
+        await this.clienteRepository.update(id, { endereco: enderecoSalvo });
+      }
+    }
+
     const clienteNovo = await this.clienteRepository.findOne({
       where: { id },
       relations: ['endereco'],
     });
 
-    // Registrar auditoria se usuário informado
     if (usuario && clienteNovo) {
       await this.auditoriaService.registrarAtualizacao(
         usuario,
@@ -127,7 +170,6 @@ export class ClienteService {
     ipAddress?: string,
     userAgent?: string,
   ) {
-    // Buscar dados para auditoria antes de remover (incluindo processos)
     const cliente = await this.clienteRepository.findOne({
       where: { id },
       relations: [
@@ -144,7 +186,6 @@ export class ClienteService {
       throw new Error('Cliente não encontrado');
     }
 
-    // Registrar auditoria dos processos que serão excluídos junto
     if (usuario && cliente.processos && cliente.processos.length > 0) {
       for (const processo of cliente.processos) {
         await this.auditoriaService.registrarRemocao(
@@ -161,7 +202,6 @@ export class ClienteService {
 
     const resultado = await this.clienteRepository.delete(id);
 
-    // Registrar auditoria do cliente
     if (usuario) {
       await this.auditoriaService.registrarRemocao(
         usuario,

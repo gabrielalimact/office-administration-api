@@ -11,6 +11,7 @@ import { ArquivoModule } from '../arquivo/arquivo.module';
 import { Usuario } from '../usuario/entity/usuario.entity';
 import { AuditoriaModule } from '../auditoria/auditoria.module';
 import { TipoAgendamento } from './entities/agendamento.entity';
+import { Arquivo } from '../arquivo/entities/arquivo.entity';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { TipoAgendamento } from './entities/agendamento.entity';
       Beneficio,
       Usuario,
       TipoAgendamento,
+      Arquivo,
     ]),
     ArquivoModule,
     AuditoriaModule,

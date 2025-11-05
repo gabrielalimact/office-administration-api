@@ -158,6 +158,17 @@ export class UsuarioService {
     if (!usuario) {
       throw new Error('Usuário não encontrado');
     }
+
+    const processosAssociados = await this.processosRepository.count({
+      where: { colaborador: { id } },
+    });
+
+    if (processosAssociados > 0) {
+      throw new Error(
+        `Não é possível excluir o usuário "${usuario.nome}" pois ele possui ${processosAssociados} processo(s) associado(s). Para excluir este usuário, primeiro reassine ou remova os processos vinculados a ele.`,
+      );
+    }
+
     await this.usuarioRepository.delete(id);
   }
 
