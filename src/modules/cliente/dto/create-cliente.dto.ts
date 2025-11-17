@@ -38,6 +38,10 @@ export class CreateClienteDto {
   naturalidade?: string;
 
   @IsOptional()
+  @IsString()
+  telefone?: string;
+
+  @IsOptional()
   @ValidateNested()
   @Type(() => CreateEnderecoDto)
   endereco?: CreateEnderecoDto;

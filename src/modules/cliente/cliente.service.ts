@@ -26,7 +26,7 @@ export class ClienteService {
         'processos.status',
         'processos.beneficio',
         'processos.tipo_agendamento',
-        'processos.colaborador',
+        'processos.funcionario',
         'processos.documentos',
       ],
     });
@@ -35,11 +35,11 @@ export class ClienteService {
       ...cliente,
       processos: cliente.processos.map((processo) => ({
         ...processo,
-        colaborador: processo.colaborador
+        funcionario: processo.funcionario
           ? {
-              id: processo.colaborador.id,
-              nome: processo.colaborador.nome,
-              cargo: processo.colaborador.cargo,
+              id: processo.funcionario.id,
+              nome: processo.funcionario.nome,
+              cargo: processo.funcionario.cargo,
             }
           : null,
       })),
@@ -55,7 +55,7 @@ export class ClienteService {
         'processos.status',
         'processos.beneficio',
         'processos.tipo_agendamento',
-        'processos.colaborador',
+        'processos.funcionario',
         'processos.documentos',
       ],
     });
@@ -68,11 +68,11 @@ export class ClienteService {
       ...cliente,
       processos: cliente.processos.map((processo) => ({
         ...processo,
-        colaborador: processo.colaborador
+        funcionario: processo.funcionario
           ? {
-              id: processo.colaborador.id,
-              nome: processo.colaborador.nome,
-              cargo: processo.colaborador.cargo,
+              id: processo.funcionario.id,
+              nome: processo.funcionario.nome,
+              cargo: processo.funcionario.cargo,
             }
           : null,
       })),
@@ -177,7 +177,7 @@ export class ClienteService {
         'processos',
         'processos.status',
         'processos.beneficio',
-        'processos.colaborador',
+        'processos.funcionario',
         'processos.tipo_agendamento',
       ],
     });

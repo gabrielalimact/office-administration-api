@@ -35,6 +35,9 @@ export class Cliente {
   @Column({ nullable: true })
   naturalidade: string;
 
+  @Column({ nullable: true })
+  telefone: string;
+
   @OneToOne(() => Endereco, (endereco) => endereco.cliente, { cascade: true })
   @JoinColumn({ name: 'id_endereco' })
   endereco: Endereco;
