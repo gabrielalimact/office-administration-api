@@ -95,7 +95,7 @@ export class UsuarioService {
     }
 
     const processosAssociados = await this.processosRepository.count({
-      where: { colaborador: { id } },
+      where: { funcionario: { id } },
     });
 
     if (processosAssociados > 0) {
@@ -113,8 +113,8 @@ export class UsuarioService {
     const funcionariosComProcessos = await Promise.all(
       funcionarios.map(async (funcionario) => {
         const processos = await this.processosRepository.find({
-          where: { colaborador: { id: funcionario.id } },
-          relations: ['cliente', 'status', 'beneficio', 'colaborador'],
+          where: { funcionario: { id: funcionario.id } },
+          relations: ['cliente', 'status', 'beneficio', 'funcionario'],
         });
 
         return {

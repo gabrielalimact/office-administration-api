@@ -24,8 +24,8 @@ export class Processo {
   cliente: Cliente;
 
   @ManyToOne(() => Usuario, { nullable: true })
-  @JoinColumn({ name: 'id_colaborador' })
-  colaborador: Usuario;
+  @JoinColumn({ name: 'id_funcionario' })
+  funcionario: Usuario;
 
   @ManyToOne(() => Beneficio)
   beneficio: Beneficio;
@@ -48,11 +48,17 @@ export class Processo {
   @Column({ type: 'date' })
   data_cadastro: string;
 
+  @Column({ nullable: true })
+  colaborador_responsavel: string;
+
   @Column({ type: 'timestamp', nullable: true })
   data_agendamento: string;
 
   @Column({ type: 'date' })
   data_ultima_atualizacao: string;
+
+  @Column({ type: 'date', nullable: true })
+  data_protocolo: string;
 
   @ManyToOne(() => StatusProcesso)
   status: StatusProcesso;

@@ -18,7 +18,7 @@ export class CreateProcessoExistingDto {
   beneficioId: number;
 
   @IsInt()
-  colaboradorId: number;
+  funcionarioId: number;
 
   @IsBoolean()
   olhar_inss: boolean;
@@ -30,6 +30,10 @@ export class CreateProcessoExistingDto {
   @IsOptional()
   senha_inss?: string;
 
+  @IsString()
+  @IsOptional()
+  colaborador_responsavel?: string;
+
   @IsDateString()
   data_cadastro: string;
 
@@ -40,6 +44,10 @@ export class CreateProcessoExistingDto {
   @IsDateString()
   @IsOptional()
   data_agendamento: string;
+
+  @IsDateString()
+  @IsOptional()
+  data_protocolo?: string;
 
   @IsString()
   @IsOptional()

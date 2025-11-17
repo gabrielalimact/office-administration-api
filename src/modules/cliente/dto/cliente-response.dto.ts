@@ -1,10 +1,10 @@
-export class ColaboradorSimplificadoDto {
+export class FuncionarioSimplificadoDto {
   id: number;
   nome: string;
   cargo: string;
 }
 
-export class ProcessoComColaboradorDto {
+export class ProcessoComFuncionarioDto {
   id: number;
   status: any;
   beneficio: any;
@@ -16,7 +16,7 @@ export class ProcessoComColaboradorDto {
   data_ultima_atualizacao: string;
   observacoes: string;
   arquivo_documentos: any;
-  colaborador: ColaboradorSimplificadoDto;
+  funcionario: FuncionarioSimplificadoDto;
 }
 
 export class ClienteComProcessosDto {
@@ -28,6 +28,7 @@ export class ClienteComProcessosDto {
   rg: string;
   filiacao: string;
   naturalidade: string;
+  telefone: string;
   endereco: any;
-  processos: ProcessoComColaboradorDto[];
+  processos: ProcessoComFuncionarioDto[];
 }

@@ -148,8 +148,8 @@ export async function seedAll(dataSource: DataSource) {
 
   for (let index = 0; index < clientes.length; index++) {
     const cliente = clientes[index];
-    const colaborador1 = funcionarios[index % funcionarios.length];
-    const colaborador2 = funcionarios[(index + 1) % funcionarios.length];
+    const funcionario1 = funcionarios[index % funcionarios.length];
+    const funcionario2 = funcionarios[(index + 1) % funcionarios.length];
 
     // Verificar se processos já existem para este cliente
     const processosExistentes = await processoRepo.find({
@@ -159,7 +159,7 @@ export async function seedAll(dataSource: DataSource) {
     if (processosExistentes.length < 2) {
       const processo1 = processoRepo.create({
         cliente: cliente,
-        colaborador: colaborador1, // Passando o objeto Usuario, não apenas o nome
+        funcionario: funcionario1, // Passando o objeto Usuario, não apenas o nome
         beneficio: beneficio1,
         olhar_inss: false,
         olhar_pje_creta: false,
@@ -174,7 +174,7 @@ export async function seedAll(dataSource: DataSource) {
       if (processosExistentes.length < 1) {
         const processo2 = processoRepo.create({
           cliente: cliente,
-          colaborador: colaborador2, // Passando o objeto Usuario, não apenas o nome
+          funcionario: funcionario2, // Passando o objeto Usuario, não apenas o nome
           beneficio: beneficio2,
           olhar_inss: true,
           olhar_pje_creta: true,

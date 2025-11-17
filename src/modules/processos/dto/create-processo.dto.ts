@@ -21,7 +21,11 @@ export class CreateProcessoDto {
 
   @IsOptional()
   @IsNumber()
-  colaboradorId?: number;
+  funcionarioId?: number;
+
+  @IsOptional()
+  @IsString()
+  colaborador_responsavel?: string;
 
   @Type(() => Beneficio)
   @IsNotEmpty()
@@ -53,6 +57,11 @@ export class CreateProcessoDto {
   @IsString()
   @IsDateString()
   data_ultima_atualizacao?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsDateString()
+  data_protocolo?: string;
 
   @Type(() => StatusProcesso)
   @IsNotEmpty()

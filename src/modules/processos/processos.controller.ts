@@ -78,14 +78,16 @@ export class ProcessosController {
     @UploadedFile() file: Express.Multer.File,
     @Req() request: Request,
   ) {
+    console.log(body);
     const createProcessoDto: CreateProcessoDto = {
       cliente:
         typeof body.cliente === 'string'
           ? JSON.parse(body.cliente)
           : body.cliente,
-      colaboradorId: body.colaboradorId
-        ? parseInt(body.colaboradorId)
+      funcionarioId: body.funcionarioId
+        ? parseInt(body.funcionarioId)
         : undefined,
+      colaborador_responsavel: body.colaborador_responsavel || undefined,
       beneficio:
         typeof body.beneficio === 'string'
           ? JSON.parse(body.beneficio)
@@ -100,6 +102,7 @@ export class ProcessosController {
       data_cadastro: body.data_cadastro || undefined,
       data_agendamento: body.data_agendamento || undefined,
       data_ultima_atualizacao: body.data_ultima_atualizacao || undefined,
+      data_protocolo: body.data_protocolo || undefined,
       status:
         typeof body.status === 'string' ? JSON.parse(body.status) : body.status,
       tipo_agendamento:
@@ -237,9 +240,10 @@ export class ProcessosController {
     @UploadedFile() file?: Express.Multer.File,
   ) {
     const updateProcessoDto: UpdateProcessoDto = {
-      colaboradorId: body.colaboradorId
-        ? parseInt(body.colaboradorId)
+      funcionarioId: body.funcionarioId
+        ? parseInt(body.funcionarioId)
         : undefined,
+      colaborador_responsavel: body.colaborador_responsavel || undefined,
       beneficio:
         typeof body.beneficio === 'string'
           ? JSON.parse(body.beneficio)

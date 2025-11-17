@@ -52,13 +52,13 @@ export class ProcessosService {
     userAgent?: string,
   ) {
     return await this.dataSource.transaction(async (manager) => {
-      let colaborador = null;
-      if (createProcessoDto.colaboradorId) {
-        colaborador = await manager.findOne(Usuario, {
-          where: { id: createProcessoDto.colaboradorId },
+      let funcionario = null;
+      if (createProcessoDto.funcionarioId) {
+        funcionario = await manager.findOne(Usuario, {
+          where: { id: createProcessoDto.funcionarioId },
         });
-        if (!colaborador) {
-          throw new Error('Colaborador não encontrado');
+        if (!funcionario) {
+          throw new Error('funcionario não encontrado');
         }
       }
 
@@ -85,6 +85,7 @@ export class ProcessosService {
         rg: createProcessoDto.cliente.rg || null,
         filiacao: createProcessoDto.cliente.filiacao || null,
         naturalidade: createProcessoDto.cliente.naturalidade || null,
+        telefone: createProcessoDto.cliente.telefone || null,
         endereco,
       });
 
@@ -92,8 +93,10 @@ export class ProcessosService {
 
       const processo = manager.create(Processo, {
         cliente: clienteSalvo,
-        colaborador,
+        funcionario,
         beneficio: createProcessoDto.beneficio,
+        colaborador_responsavel:
+          createProcessoDto.colaborador_responsavel || '',
         olhar_inss: createProcessoDto.olhar_inss || false,
         olhar_pje_creta: createProcessoDto.olhar_pje_creta || false,
         senha_inss: createProcessoDto.senha_inss || null,
@@ -103,6 +106,7 @@ export class ProcessosService {
         data_ultima_atualizacao:
           createProcessoDto.data_ultima_atualizacao ||
           new Date().toISOString().split('T')[0],
+        data_protocolo: createProcessoDto.data_protocolo || null,
         data_agendamento: createProcessoDto.data_agendamento || null,
         status: createProcessoDto.status,
         tipo_agendamento: createProcessoDto.tipo_agendamento || null,
@@ -196,11 +200,11 @@ export class ProcessosService {
         throw new Error('Cliente não encontrado');
       }
 
-      const colaborador = await manager.findOne(Usuario, {
-        where: { id: dto.colaboradorId },
+      const funcionario = await manager.findOne(Usuario, {
+        where: { id: dto.funcionarioId },
       });
-      if (!colaborador) {
-        throw new Error('Colaborador não encontrado');
+      if (!funcionario) {
+        throw new Error('funcionario não encontrado');
       }
 
       const status = await manager.findOne(StatusProcesso, {
@@ -225,12 +229,14 @@ export class ProcessosService {
         olhar_inss: dto.olhar_inss,
         olhar_pje_creta: dto.olhar_pje_creta,
         senha_inss: dto.senha_inss,
+        colaborador_responsavel: dto.colaborador_responsavel || '',
         data_cadastro: dto.data_cadastro,
+        data_protocolo: dto.data_protocolo || null,
         observacoes: dto.observacoes,
         data_ultima_atualizacao:
           dto.data_ultima_atualizacao || new Date().toISOString().split('T')[0],
         cliente: { id: clienteId },
-        colaborador,
+        funcionario,
         status,
         tipo_agendamento,
         beneficio,
@@ -281,7 +287,7 @@ export class ProcessosService {
         'tipo_agendamento',
         'beneficio',
         'documentos',
-        'colaborador',
+        'funcionario',
       ],
       order: {
         data_ultima_atualizacao: 'DESC',
@@ -290,11 +296,11 @@ export class ProcessosService {
 
     return processos.map((processo) => ({
       ...processo,
-      colaborador: processo.colaborador
+      funcionario: processo.funcionario
         ? {
-            id: processo.colaborador.id,
-            nome: processo.colaborador.nome,
-            cargo: processo.colaborador.cargo,
+            id: processo.funcionario.id,
+            nome: processo.funcionario.nome,
+            cargo: processo.funcionario.cargo,
           }
         : null,
     }));
@@ -310,7 +316,7 @@ export class ProcessosService {
         'tipo_agendamento',
         'cliente.endereco',
         'documentos',
-        'colaborador',
+        'funcionario',
       ],
       order: {
         data_ultima_atualizacao: 'DESC',
@@ -319,11 +325,11 @@ export class ProcessosService {
 
     return processos.map((processo) => ({
       ...processo,
-      colaborador: processo.colaborador
+      funcionario: processo.funcionario
         ? {
-            id: processo.colaborador.id,
-            nome: processo.colaborador.nome,
-            cargo: processo.colaborador.cargo,
+            id: processo.funcionario.id,
+            nome: processo.funcionario.nome,
+            cargo: processo.funcionario.cargo,
           }
         : null,
     }));
@@ -345,7 +351,7 @@ export class ProcessosService {
         'tipo_agendamento',
         'beneficio',
         'documentos',
-        'colaborador',
+        'funcionario',
       ],
     });
 
@@ -355,11 +361,11 @@ export class ProcessosService {
 
     return {
       ...processo,
-      colaborador: processo.colaborador
+      funcionario: processo.funcionario
         ? {
-            id: processo.colaborador.id,
-            nome: processo.colaborador.nome,
-            cargo: processo.colaborador.cargo,
+            id: processo.funcionario.id,
+            nome: processo.funcionario.nome,
+            cargo: processo.funcionario.cargo,
           }
         : null,
     };
