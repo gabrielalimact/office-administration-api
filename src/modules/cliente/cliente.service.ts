@@ -113,9 +113,6 @@ export class ClienteService {
     const resultado = await this.clienteRepository.update(id, dadosLimpos);
 
     if (dadosEndereco) {
-      console.log('Dados de endereço recebidos:', dadosEndereco);
-      console.log('Cliente anterior tem endereço?', !!clienteAnterior.endereco);
-
       const enderecoLimpo = {
         logradouro: dadosEndereco.logradouro || '',
         numero: dadosEndereco.numero || '',
@@ -126,16 +123,11 @@ export class ClienteService {
         cep: dadosEndereco.cep || '',
       };
       if (clienteAnterior.endereco) {
-        console.log(
-          'Atualizando endereço existente ID:',
-          clienteAnterior.endereco.id,
-        );
         await this.enderecosRepository.update(
           clienteAnterior.endereco.id,
           enderecoLimpo,
         );
       } else {
-        console.log('Criando novo endereço para cliente');
         const novoEndereco = this.enderecosRepository.create(enderecoLimpo);
         const enderecoSalvo = await this.enderecosRepository.save(novoEndereco);
 

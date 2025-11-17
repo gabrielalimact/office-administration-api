@@ -138,12 +138,6 @@ export class ProcessosService {
             tipo_mime: dadosArquivo.tipo_mime,
             processo: { id: processo.id } as any,
           });
-          console.log('[Arquivo->save] processoId=', processoSalvo.id);
-          console.log('[Arquivo->save] payload=', {
-            nome_arquivo: dadosArquivo.nome_arquivo,
-            hasProcesso: !!(arquivo as any).processo,
-            processoIdInPayload: (arquivo as any).processo?.id ?? null,
-          });
           await manager.save(Arquivo, arquivo);
 
           if (usuarioLogado) {
@@ -264,12 +258,6 @@ export class ProcessosService {
             tipo_mime: dadosArquivo.tipo_mime,
             processo: { id: processoSalvo.id } as any,
           });
-          console.log('[Arquivo->save] processoId=', processoSalvo.id);
-          console.log('[Arquivo->save] payload=', {
-            nome_arquivo: dadosArquivo.nome_arquivo,
-            hasProcesso: !!(arquivo as any).processo,
-            processoIdInPayload: (arquivo as any).processo?.id ?? null,
-          });
           await manager.save(Arquivo, arquivo);
         } catch (error) {
           throw new Error(`Erro ao salvar arquivo: ${error.message}`);
@@ -336,7 +324,6 @@ export class ProcessosService {
   }
   findAllStatus() {
     return this.statusProcessoRepository.find().catch((e) => {
-      console.error('Erro ao buscar status:', e);
       throw e;
     });
   }
@@ -409,12 +396,7 @@ export class ProcessosService {
         tipo_mime: dadosArquivo.tipo_mime,
         processo: { id: processo.id } as any,
       });
-      console.log('[Arquivo->save] processoId=', processoSalvo.id);
-      console.log('[Arquivo->save] payload=', {
-        nome_arquivo: dadosArquivo.nome_arquivo,
-        hasProcesso: !!(arquivo as any).processo,
-        processoIdInPayload: (arquivo as any).processo?.id ?? null,
-      });
+
       await this.arquivoRepository.save(arquivo);
     }
 

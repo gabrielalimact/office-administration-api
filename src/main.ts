@@ -16,10 +16,6 @@ async function bootstrap() {
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        console.warn(
-          `🚫 CORS bloqueou requisição de origem não permitida: ${origin}`,
-        );
-        console.log(`📋 Origens permitidas: ${allowedOrigins.join(', ')}`);
         callback(new Error('Não permitido pelo CORS'), false);
       }
     },
@@ -43,13 +39,9 @@ async function bootstrap() {
     const origin = req.headers.origin;
     const allowedOrigins = getAllowedOrigins();
 
-    console.log(`🖼️ Requisição de imagem - Origin: ${origin || 'NONE'}`);
-    console.log(`📋 Origens permitidas: ${allowedOrigins.join(', ')}`);
-
     if (!origin || allowedOrigins.includes(origin)) {
       if (origin) {
         res.setHeader('Access-Control-Allow-Origin', origin);
-        console.log(`✅ CORS permitido para: ${origin}`);
       } else {
         console.log('✅ Requisição direta (sem origin) permitida');
       }
@@ -67,7 +59,6 @@ async function bootstrap() {
     res.setHeader('Cache-Control', 'public, max-age=31536000');
 
     if (req.method === 'OPTIONS') {
-      console.log('🔄 Respondendo a preflight de imagem');
       res.status(200).end();
       return;
     }

@@ -78,7 +78,6 @@ export class ProcessosController {
     @UploadedFile() file: Express.Multer.File,
     @Req() request: Request,
   ) {
-    console.log(body);
     const createProcessoDto: CreateProcessoDto = {
       cliente:
         typeof body.cliente === 'string'
@@ -326,9 +325,6 @@ export class ProcessosController {
     @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    console.log('🔥 ENTROU NA ROTA /documentos');
-    console.log('📁 File recebido:', file);
-
     if (!file) {
       throw new Error('Nenhum arquivo foi enviado');
     }
