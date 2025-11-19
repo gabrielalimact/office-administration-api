@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsBoolean,
   IsDateString,
   IsOptional,
@@ -11,7 +12,7 @@ import {
 import { CreateClienteDto } from '../../cliente/dto/create-cliente.dto';
 import { StatusProcesso } from '../entities/status-processo.entity';
 import { Beneficio } from '../entities/beneficios.entity';
-import { TipoAgendamento } from '../entities/agendamento.entity';
+import { CreateProcessoAgendamentoDto } from './processo-agendamento.dto';
 
 export class CreateProcessoDto {
   @ValidateNested()
@@ -51,11 +52,6 @@ export class CreateProcessoDto {
   @IsOptional()
   @IsString()
   @IsDateString()
-  data_agendamento?: string;
-
-  @IsOptional()
-  @IsString()
-  @IsDateString()
   data_ultima_atualizacao?: string;
 
   @IsOptional()
@@ -68,8 +64,10 @@ export class CreateProcessoDto {
   status: StatusProcesso;
 
   @IsOptional()
-  @Type(() => TipoAgendamento)
-  tipo_agendamento?: TipoAgendamento;
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateProcessoAgendamentoDto)
+  agendamentos?: CreateProcessoAgendamentoDto[];
 
   @IsOptional()
   @IsString()

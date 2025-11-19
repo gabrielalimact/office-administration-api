@@ -45,9 +45,10 @@ export class DashboardService {
 
     const processosPorTipoAgendamento = await this.processosRepository
       .createQueryBuilder('processo')
-      .leftJoin('processo.tipo_agendamento', 'tipo_agendamento')
+      .leftJoin('processo.agendamentos', 'agendamento')
+      .leftJoin('agendamento.tipo_agendamento', 'tipo_agendamento')
       .select('tipo_agendamento.nome', 'tipo_agendamento')
-      .addSelect('COUNT(processo.id)', 'quantidade')
+      .addSelect('COUNT(DISTINCT processo.id)', 'quantidade')
       .where('processo.arquivado = :arquivado', { arquivado: false })
       .groupBy('tipo_agendamento.id')
       .addGroupBy('tipo_agendamento.nome')

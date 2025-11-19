@@ -25,7 +25,7 @@ export class ClienteService {
         'processos',
         'processos.status',
         'processos.beneficio',
-        'processos.tipo_agendamento',
+        'processos.agendamentos',
         'processos.funcionario',
         'processos.documentos',
       ],
@@ -54,7 +54,7 @@ export class ClienteService {
         'processos',
         'processos.status',
         'processos.beneficio',
-        'processos.tipo_agendamento',
+        'processos.agendamentos',
         'processos.funcionario',
         'processos.documentos',
       ],
@@ -170,7 +170,7 @@ export class ClienteService {
         'processos.status',
         'processos.beneficio',
         'processos.funcionario',
-        'processos.tipo_agendamento',
+        'processos.agendamentos',
       ],
     });
 

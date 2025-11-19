@@ -1,18 +1,18 @@
+import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsBoolean,
   IsDateString,
   IsInt,
   IsOptional,
   IsString,
+  ValidateNested,
 } from 'class-validator';
+import { CreateProcessoAgendamentoDto } from './processo-agendamento.dto';
 
 export class CreateProcessoExistingDto {
   @IsInt()
   statusId: number;
-
-  @IsOptional()
-  @IsInt()
-  tipoAgendamentoId?: number;
 
   @IsInt()
   beneficioId: number;
@@ -43,11 +43,13 @@ export class CreateProcessoExistingDto {
 
   @IsDateString()
   @IsOptional()
-  data_agendamento: string;
-
-  @IsDateString()
-  @IsOptional()
   data_protocolo?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateProcessoAgendamentoDto)
+  agendamentos?: CreateProcessoAgendamentoDto[];
 
   @IsString()
   @IsOptional()

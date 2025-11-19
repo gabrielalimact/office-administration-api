@@ -13,7 +13,7 @@ import { ArquivoService } from '../arquivo/arquivo.service';
 import { Usuario } from '../usuario/entity/usuario.entity';
 import { AuditoriaService } from '../auditoria/auditoria.service';
 import { TipoEntidade } from '../auditoria/entities/auditoria-log.entity';
-import { TipoAgendamento } from './entities/agendamento.entity';
+import { ProcessoAgendamento } from './entities/processo-agendamento.entity';
 import { Arquivo } from '../arquivo/entities/arquivo.entity';
 
 @Injectable()
@@ -39,6 +39,9 @@ export class ProcessosService {
 
     @InjectRepository(Arquivo)
     private readonly arquivoRepository: Repository<Arquivo>,
+
+    @InjectRepository(ProcessoAgendamento)
+    private readonly processoAgendamentoRepository: Repository<ProcessoAgendamento>,
 
     private readonly arquivoService: ArquivoService,
     private readonly dataSource: DataSource,
@@ -107,9 +110,7 @@ export class ProcessosService {
           createProcessoDto.data_ultima_atualizacao ||
           new Date().toISOString().split('T')[0],
         data_protocolo: createProcessoDto.data_protocolo || null,
-        data_agendamento: createProcessoDto.data_agendamento || null,
         status: createProcessoDto.status,
-        tipo_agendamento: createProcessoDto.tipo_agendamento || null,
         observacoes: createProcessoDto.observacoes || null,
       });
 
@@ -206,14 +207,6 @@ export class ProcessosService {
       });
       if (!status) throw new Error('Status inválido');
 
-      let tipo_agendamento = null;
-      if (dto.tipoAgendamentoId) {
-        tipo_agendamento = await manager.findOne(TipoAgendamento, {
-          where: { id: dto.tipoAgendamentoId },
-        });
-        if (!tipo_agendamento) throw new Error('Tipo de agendamento inválido');
-      }
-
       const beneficio = await manager.findOne(Beneficio, {
         where: { id: dto.beneficioId },
       });
@@ -232,7 +225,6 @@ export class ProcessosService {
         cliente: { id: clienteId },
         funcionario,
         status,
-        tipo_agendamento,
         beneficio,
       });
 
@@ -272,10 +264,10 @@ export class ProcessosService {
       relations: [
         'cliente',
         'status',
-        'tipo_agendamento',
         'beneficio',
         'documentos',
         'funcionario',
+        'agendamentos',
       ],
       order: {
         data_ultima_atualizacao: 'DESC',
@@ -301,10 +293,10 @@ export class ProcessosService {
         'cliente',
         'status',
         'beneficio',
-        'tipo_agendamento',
         'cliente.endereco',
         'documentos',
         'funcionario',
+        'agendamentos',
       ],
       order: {
         data_ultima_atualizacao: 'DESC',
@@ -335,10 +327,10 @@ export class ProcessosService {
         'cliente',
         'cliente.endereco',
         'status',
-        'tipo_agendamento',
         'beneficio',
         'documentos',
         'funcionario',
+        'agendamentos',
       ],
     });
 
@@ -363,44 +355,95 @@ export class ProcessosService {
     updateProcessoDto: UpdateProcessoDto,
     file?: Express.Multer.File,
   ) {
-    const processo = await this.processosRepository.findOne({
-      where: { id },
-      relations: ['cliente', 'documentos'],
-    });
-
-    if (!processo) {
-      throw new Error('Processo não encontrado');
-    }
-
-    Object.assign(processo, updateProcessoDto);
-    processo.data_ultima_atualizacao = new Date().toISOString().split('T')[0];
-
-    const processoSalvo = await this.processosRepository.save(processo);
-
-    if (file) {
-      const nomeCliente = processo.cliente.nome.replace(/\s+/g, '_');
-      const dataCadastro = processo.data_cadastro.replace(/-/g, '');
-      const extensao = file.originalname.split('.').pop();
-      const nomePersonalizado = `${nomeCliente}_${dataCadastro}_${Date.now()}.${extensao}`;
-
-      const dadosArquivo = await this.arquivoService.salvarArquivo(
-        file,
-        nomePersonalizado,
-      );
-
-      const arquivo = this.arquivoRepository.create({
-        nome_original: dadosArquivo.nome_original,
-        nome_arquivo: dadosArquivo.nome_arquivo,
-        caminho: dadosArquivo.caminho,
-        tamanho: dadosArquivo.tamanho,
-        tipo_mime: dadosArquivo.tipo_mime,
-        processo: { id: processo.id } as any,
+    return await this.dataSource.transaction(async (manager) => {
+      const processo = await manager.findOne(Processo, {
+        where: { id },
+        relations: ['cliente', 'documentos', 'agendamentos'],
       });
 
-      await this.arquivoRepository.save(arquivo);
-    }
+      if (!processo) {
+        throw new Error('Processo não encontrado');
+      }
 
-    return processoSalvo;
+      // Separar agendamentos dos outros dados
+      const { agendamentos, ...dadosProcesso } = updateProcessoDto;
+
+      // Atualizar dados do processo (exceto agendamentos)
+      Object.assign(processo, dadosProcesso);
+      processo.data_ultima_atualizacao = new Date().toISOString().split('T')[0];
+
+      // Salvar processo sem agendamentos primeiro
+      const processoAtualizado = await manager.save(Processo, processo);
+
+      // Tratar agendamentos se foram enviados
+      if (agendamentos && Array.isArray(agendamentos)) {
+        // Buscar agendamentos existentes
+        const agendamentosExistentes = await manager.find(ProcessoAgendamento, {
+          where: { processo: { id: processoAtualizado.id } },
+        });
+
+        // Processar cada agendamento
+        for (const agendamentoData of agendamentos as any[]) {
+          if (agendamentoData.id && agendamentoData.id > 0) {
+            // Agendamento existente - atualizar
+            const agendamentoExistente = agendamentosExistentes.find(
+              (a) => a.id === agendamentoData.id,
+            );
+
+            if (agendamentoExistente) {
+              Object.assign(agendamentoExistente, {
+                data_agendamento: agendamentoData.data_agendamento,
+                observacoes: agendamentoData.observacoes,
+                concluido: agendamentoData.concluido,
+                updated_at: new Date(),
+                tipo_agendamento: agendamentoData.tipo_agendamento,
+              });
+              await manager.save(ProcessoAgendamento, agendamentoExistente);
+            }
+          } else {
+            // Novo agendamento (id = 0 ou sem id)
+            const novoAgendamento = manager.create(ProcessoAgendamento, {
+              data_agendamento: agendamentoData.data_agendamento,
+              observacoes: agendamentoData.observacoes,
+              concluido: agendamentoData.concluido || false,
+              created_at: new Date(),
+              updated_at: new Date(),
+              processo: { id: processoAtualizado.id },
+              tipo_agendamento: agendamentoData.tipo_agendamento,
+            });
+            await manager.save(ProcessoAgendamento, novoAgendamento);
+          }
+        }
+      }
+
+      if (file) {
+        const nomeCliente = processoAtualizado.cliente.nome.replace(
+          /\s+/g,
+          '_',
+        );
+        const dataCadastro = processoAtualizado.data_cadastro.replace(/-/g, '');
+        const extensao = file.originalname.split('.').pop();
+        const nomePersonalizado = `${nomeCliente}_${dataCadastro}_${Date.now()}.${extensao}`;
+
+        const dadosArquivo = await this.arquivoService.salvarArquivo(
+          file,
+          nomePersonalizado,
+        );
+
+        const arquivo = manager.create(Arquivo, {
+          nome_original: dadosArquivo.nome_original,
+          nome_arquivo: dadosArquivo.nome_arquivo,
+          caminho: dadosArquivo.caminho,
+          tamanho: dadosArquivo.tamanho,
+          tipo_mime: dadosArquivo.tipo_mime,
+          processo: { id: processoAtualizado.id } as any,
+        });
+
+        await manager.save(Arquivo, arquivo);
+      }
+
+      return processoAtualizado;
+    });
   }
 
   remove(id: number) {

@@ -9,6 +9,7 @@ import { Arquivo } from './modules/arquivo/entities/arquivo.entity';
 import { Relatorio } from './modules/relatorios/entities/relatorios.entity';
 import { AuditoriaLog } from './modules/auditoria/entities/auditoria-log.entity';
 import { TipoAgendamento } from './modules/processos/entities/agendamento.entity';
+import { ProcessoAgendamento } from './modules/processos/entities/processo-agendamento.entity';
 import * as dotenv from 'dotenv';
 dotenv.config();
 export const AppDataSource = new DataSource({
@@ -29,6 +30,7 @@ export const AppDataSource = new DataSource({
     Relatorio,
     AuditoriaLog,
     TipoAgendamento,
+    ProcessoAgendamento,
   ],
   migrations: ['dist/migrations/*.js'],
   migrationsTableName: 'migrations',

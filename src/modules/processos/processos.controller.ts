@@ -99,15 +99,14 @@ export class ProcessosController {
         false,
       senha_inss: body.senha_inss || undefined,
       data_cadastro: body.data_cadastro || undefined,
-      data_agendamento: body.data_agendamento || undefined,
       data_ultima_atualizacao: body.data_ultima_atualizacao || undefined,
       data_protocolo: body.data_protocolo || undefined,
       status:
         typeof body.status === 'string' ? JSON.parse(body.status) : body.status,
-      tipo_agendamento:
-        typeof body.tipo_agendamento === 'string'
-          ? JSON.parse(body.tipo_agendamento)
-          : body.tipo_agendamento,
+      agendamentos:
+        typeof body.agendamentos === 'string'
+          ? JSON.parse(body.agendamentos)
+          : body.agendamentos,
       observacoes: body.observacoes || undefined,
     };
 
@@ -252,14 +251,13 @@ export class ProcessosController {
         body.olhar_pje_creta === 'true' || body.olhar_pje_creta === true,
       senha_inss: body.senha_inss || undefined,
       data_cadastro: body.data_cadastro || undefined,
-      data_agendamento: body.data_agendamento || undefined,
       data_ultima_atualizacao: body.data_ultima_atualizacao || undefined,
       status:
         typeof body.status === 'string' ? JSON.parse(body.status) : body.status,
-      tipo_agendamento:
-        typeof body.tipo_agendamento === 'string'
-          ? JSON.parse(body.tipo_agendamento)
-          : body.tipo_agendamento,
+      agendamentos:
+        typeof body.agendamentos === 'string'
+          ? JSON.parse(body.agendamentos)
+          : body.agendamentos,
       observacoes: body.observacoes || undefined,
     };
 
